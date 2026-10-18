@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Products · QualityTrack{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+  <div>
+    <h1 class="h3 fw-bold mb-1">Product Specifications</h1>
+    <p class="text-muted mb-0">Define manufactured parts, materials, and associated quality standards.</p>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- Add Product Form -->
+  <div class="col-md-4">
+    <div class="card shadow-sm">
+      <div class="card-header">
+        <span class="d-flex align-items-center gap-2">
+          <i class="bi bi-plus-circle text-primary"></i>
+          Register Product
+        </span>
+      </div>
+      <div class="card-body">
+        <form method="post">
+          <div class="mb-3">
+            <label class="form-label">Product Name <span class="text-danger">*</span></label>
+            <input class="form-control" name="name" placeholder="e.g. Turbine Impeller Flange" required>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label">Category / Material Standard</label>
+            <input class="form-control" name="category" value="Metal casting" required>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100">
+            <i class="bi bi-box-seam me-1"></i> Create Product
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Product List Table -->
+  <div class="col-md-8">
+    <div class="card shadow-sm h-100">
+      <div class="card-header">
+        <span class="d-flex align-items-center gap-2">
+          <i class="bi bi-box-seam text-primary"></i>
+          Active Products Registry
+        </span>
+        <span class="badge text-bg-secondary">{{ products|length }} Products</span>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-custom">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Product Name</th>
+              <th>Category</th>
+              <th>Active Batches</th>
+              <th>Registered Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in products %}
+            <tr>
+              <td class="fw-bold text-light">#{{ p.id }}</td>
+              <td class="fw-semibold text-light">{{ p.name }}</td>
+              <td><span class="badge text-bg-dark border border-secondary border-opacity-50">{{ p.category }}</span></td>
+              <td>
+                <span class="badge bg-primary bg-opacity-25 text-primary border border-primary border-opacity-25">
+                  {{ p.batch_count or 0 }} batches
+                </span>
+              </td>
+              <td class="small text-muted font-monospace">{{ p.created_at[:10] }}</td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="5" class="text-center text-muted py-5">
+                No products registered yet.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

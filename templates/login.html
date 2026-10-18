@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}Sign In · QualityTrack{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-4">
+  <div class="col-md-7 col-lg-5">
+    <div class="card shadow-lg border-0" style="background: rgba(21, 27, 38, 0.95); backdrop-filter: blur(20px);">
+      <div class="card-body p-4 p-sm-5">
+        <div class="text-center mb-4">
+          <div class="brand-icon mx-auto mb-3" style="width: 48px; height: 48px;">
+            <i class="bi bi-shield-check text-white fs-3"></i>
+          </div>
+          <h2 class="h4 fw-bold mb-1">Quality Inspection Portal</h2>
+          <p class="text-muted small">Sign in to record visual inspections, review defect classifications, and issue corrective actions.</p>
+        </div>
+
+        <form method="post" id="loginForm">
+          <div class="mb-3">
+            <label class="form-label">Username</label>
+            <div class="input-group">
+              <span class="input-group-text bg-surface-elevated border-secondary border-opacity-25 text-muted">
+                <i class="bi bi-person"></i>
+              </span>
+              <input class="form-control" name="username" id="usernameInput" placeholder="e.g. inspector" required autofocus>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label">Password</label>
+            <div class="input-group">
+              <span class="input-group-text bg-surface-elevated border-secondary border-opacity-25 text-muted">
+                <i class="bi bi-lock"></i>
+              </span>
+              <input class="form-control" type="password" name="password" id="passwordInput" placeholder="••••••••" required>
+            </div>
+          </div>
+
+          <button class="btn btn-primary w-100 py-2 fw-semibold mb-4">
+            <i class="bi bi-box-arrow-in-right me-1"></i> Sign In to QualityTrack
+          </button>
+        </form>
+
+        <div class="text-center text-muted small fw-semibold text-uppercase mb-3" style="letter-spacing: 0.05em;">
+          — Quick One-Click Demo Access —
+        </div>
+
+        <div class="d-flex flex-column gap-2">
+          <div class="quick-login-card d-flex align-items-center justify-content-between" onclick="quickLogin('inspector', 'inspect123')">
+            <div class="d-flex align-items-center gap-3">
+              <div class="p-2 rounded bg-primary bg-opacity-10 text-primary">
+                <i class="bi bi-search fs-5"></i>
+              </div>
+              <div>
+                <div class="fw-bold text-light small">Quality Inspector</div>
+                <div class="text-muted" style="font-size: 0.78rem;">Upload images, run machine screening, record observations</div>
+              </div>
+            </div>
+            <i class="bi bi-arrow-right text-muted"></i>
+          </div>
+
+          <div class="quick-login-card d-flex align-items-center justify-content-between" onclick="quickLogin('supervisor', 'super123')">
+            <div class="d-flex align-items-center gap-3">
+              <div class="p-2 rounded bg-warning bg-opacity-10 text-warning">
+                <i class="bi bi-shield-check fs-5"></i>
+              </div>
+              <div>
+                <div class="fw-bold text-light small">Quality Supervisor</div>
+                <div class="text-muted" style="font-size: 0.78rem;">Perform human reviews, assign corrective actions (CAPA)</div>
+              </div>
+            </div>
+            <i class="bi bi-arrow-right text-muted"></i>
+          </div>
+
+          <div class="quick-login-card d-flex align-items-center justify-content-between" onclick="quickLogin('manager', 'manager123')">
+            <div class="d-flex align-items-center gap-3">
+              <div class="p-2 rounded bg-danger bg-opacity-10 text-danger">
+                <i class="bi bi-award fs-5"></i>
+              </div>
+              <div>
+                <div class="fw-bold text-light small">Quality Manager</div>
+                <div class="text-muted" style="font-size: 0.78rem;">Batch release/hold dispositions, audit log & quality reports</div>
+              </div>
+            </div>
+            <i class="bi bi-arrow-right text-muted"></i>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function quickLogin(user, pass) {
+  document.getElementById('usernameInput').value = user;
+  document.getElementById('passwordInput').value = pass;
+  document.getElementById('loginForm').submit();
+}
+</script>
+{% endblock %}

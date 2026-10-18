@@ -1,0 +1,10 @@
+.venv/
+.venv312/
+.venv314/
+__pycache__/
+*.py[cod]
+.env
+data/
+uploads/*
+!uploads/.gitkeep
+quality.db

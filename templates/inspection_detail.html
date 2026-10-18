@@ -1,0 +1,325 @@
+{% extends "base.html" %}
+{% block title %}Inspection #{{ inspection.id }} · QualityTrack{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb & Header -->
+<div class="mb-4">
+  <a href="{{ url_for('inspections') }}"
+    class="text-decoration-none text-muted small d-inline-flex align-items-center gap-1 mb-2">
+    <i class="bi bi-arrow-left"></i> Back to Inspections
+  </a>
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+    <div>
+
+      <h1 class="h3 fw-bold mb-1">Inspection Record #{{ inspection.id }}</h1>
+      <div class="text-muted small">
+        <span class="text-light fw-semibold">{{ inspection.product_name }}</span> ·
+        Batch <span class="badge text-bg-dark border border-secondary border-opacity-50 font-monospace">{{
+          inspection.batch_code }}</span> ·
+        Sample: <span class="text-light font-monospace fw-semibold">{{ inspection.sample_ref }}</span>
+      </div>
+    </div>
+
+    <!-- Status Indicators: AI Screening + Human Sign-off -->
+    <div class="d-flex flex-wrap align-items-center gap-2">
+      <!-- Machine Vision Screening Badge -->
+      <div class="d-flex align-items-center gap-1">
+        <span class="text-muted small">AI Screening:</span>
+        {% if inspection.ml_prediction and inspection.ml_prediction|lower == 'good' %}
+        <span class="badge-status badge-good">
+          <i class="bi bi-check-circle-fill"></i> Good
+          {% if inspection.ml_score is not none %}({{ '%.1f'|format(inspection.ml_score * 100) }}%){% endif %}
+        </span>
+        {% elif inspection.ml_prediction and inspection.ml_prediction|lower == 'defective' %}
+        <span class="badge-status badge-defective">
+          <i class="bi bi-x-circle-fill"></i> Defective
+          {% if inspection.ml_score is not none %}({{ '%.1f'|format(inspection.ml_score * 100) }}%){% endif %}
+        </span>
+        {% else %}
+        <span class="badge-status badge-neutral">Unavailable</span>
+        {% endif %}
+      </div>
+
+      <span class="text-muted opacity-25">|</span>
+
+      <!-- Human Review Final Disposition Badge -->
+      <div class="d-flex align-items-center gap-1">
+        <span class="text-muted small">Human Review:</span>
+        {% if inspection.human_result and inspection.human_result|lower == 'good' %}
+        <span class="badge-status badge-good fs-6">
+          <i class="bi bi-check-circle"></i> Passed (Good)
+        </span>
+        {% elif inspection.human_result and inspection.human_result|lower == 'defective' %}
+        <span class="badge-status badge-defective fs-6">
+          <i class="bi bi-exclamation-octagon"></i> Confirmed Defective
+        </span>
+        {% elif inspection.human_result and inspection.human_result|lower == 'uncertain' %}
+        <span class="badge-status badge-pending fs-6">
+          <i class="bi bi-question-circle"></i> Uncertain
+        </span>
+        {% else %}
+        <span class="badge-status badge-neutral fs-6">
+          <i class="bi bi-hourglass-split"></i> Pending Review
+        </span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- Left Column: Visual Evidence & Model Diagnostic -->
+  <div class="col-lg-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-header">
+        <span class="d-flex align-items-center gap-2">
+          <i class="bi bi-camera-fill text-primary"></i>
+          Physical Inspection Evidence
+        </span>
+        <span class="badge text-bg-dark border border-secondary border-opacity-50">{{ inspection.image_kind }}</span>
+      </div>
+      <div class="card-body">
+        {% if inspection.image_name %}
+        <div class="inspection-image-card mb-3">
+          <img class="inspection-image" src="{{ url_for('uploaded_file', filename=inspection.image_name) }}"
+            alt="Inspection evidence photo">
+        </div>
+        {% else %}
+        <div class="empty-image mb-3">
+          <i class="bi bi-image fs-1 mb-2 text-dim"></i>
+          <div>No photographic evidence uploaded</div>
+        </div>
+        {% endif %}
+
+        <div class="p-3 rounded bg-surface-elevated border border-secondary border-opacity-25 mb-3">
+          <div class="text-muted small fw-semibold text-uppercase mb-1">Inspector Physical Observation</div>
+          <p class="mb-0 text-light">{{ inspection.observation or 'No initial observation notes recorded.' }}</p>
+        </div>
+
+        <!-- AI Diagnostic Box -->
+        <div class="card border border-secondary border-opacity-25 p-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="fw-bold small text-muted text-uppercase d-flex align-items-center gap-1">
+              <i class="bi bi-cpu-fill text-info"></i> Machine Vision Suggestion
+            </span>
+            {% if inspection.ml_prediction and inspection.ml_prediction|lower == 'good' %}
+            <span class="badge-status badge-good">Good</span>
+            {% elif inspection.ml_prediction and inspection.ml_prediction|lower == 'defective' %}
+            <span class="badge-status badge-defective">Defective</span>
+            {% else %}
+            <span class="badge-status badge-neutral">Unavailable</span>
+            {% endif %}
+          </div>
+
+          {% if inspection.ml_score is not none %}
+          <div class="mb-2">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Model Confidence Estimate:</span>
+              <span class="fw-bold text-light font-monospace">{{ '%.2f'|format(inspection.ml_score * 100) }}%</span>
+            </div>
+            <div class="confidence-meter">
+              {% if inspection.ml_prediction and inspection.ml_prediction|lower == 'good' %}
+                <div class="confidence-bar bg-success" data-width-pct="{{ '%.1f'|format(inspection.ml_score * 100) }}"></div>
+              {% else %}
+                <div class="confidence-bar bg-danger" data-width-pct="{{ '%.1f'|format(inspection.ml_score * 100) }}"></div>
+              {% endif %}
+            </div>
+          </div>
+          {% endif %}
+
+          <div class="d-flex justify-content-between small text-dim pt-2 border-top border-secondary border-opacity-25">
+            <span>Model: {{ inspection.model_version or 'N/A' }}</span>
+            <span>Inference: {{ inspection.processing_ms or '0' }} ms</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Column: Human Review & Corrective Actions -->
+  <div class="col-lg-6 d-flex flex-column gap-4">
+    <!-- Human Review Form Card -->
+    <div class="card shadow-sm">
+      <div class="card-header">
+        <span class="d-flex align-items-center gap-2">
+          <i class="bi bi-person-check-fill text-primary"></i>
+          Human Review & Final Disposition
+        </span>
+      </div>
+      <div class="card-body">
+        <form method="post" id="reviewForm">
+          <!-- Quick 1-Click Action Buttons -->
+          <div class="mb-3">
+            <label class="form-label small text-uppercase text-muted fw-bold mb-2">Quick 1-Click Disposition</label>
+            <div class="d-flex gap-2 flex-wrap">
+              <button type="button" class="btn btn-sm btn-outline-danger flex-fill py-2"
+                onclick="quickReview('Defective')">
+                <i class="bi bi-x-circle me-1"></i> Confirm Defective
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-success flex-fill py-2" onclick="quickReview('Good')">
+                <i class="bi bi-check-circle me-1"></i> Confirm Good (Pass)
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-warning flex-fill py-2"
+                onclick="quickReview('Uncertain')">
+                <i class="bi bi-question-circle me-1"></i> Mark Uncertain
+              </button>
+            </div>
+          </div>
+
+          <hr class="border-secondary border-opacity-25 my-3">
+
+          <!-- Dropdown Selection -->
+          <div class="mb-3">
+            <label class="form-label">Review Disposition Decision <span class="text-danger">*</span></label>
+            <select class="form-select" name="human_result" id="humanResultSelect">
+              {% if (inspection.human_result and inspection.human_result|lower == 'defective') or (inspection.human_result == 'Pending' and inspection.ml_prediction and inspection.ml_prediction|lower == 'defective') %}
+                <option value="Pending">Pending Decision</option>
+                <option value="Good">Good (Pass)</option>
+                <option value="Defective" selected>Defective (Reject / Hold)</option>
+                <option value="Uncertain">Uncertain (Requires Lab / Secondary Review)</option>
+              {% elif (inspection.human_result and inspection.human_result|lower == 'good') or (inspection.human_result == 'Pending' and inspection.ml_prediction and inspection.ml_prediction|lower == 'good') %}
+                <option value="Pending">Pending Decision</option>
+                <option value="Good" selected>Good (Pass)</option>
+                <option value="Defective">Defective (Reject / Hold)</option>
+                <option value="Uncertain">Uncertain (Requires Lab / Secondary Review)</option>
+              {% elif inspection.human_result and inspection.human_result|lower == 'uncertain' %}
+                <option value="Pending">Pending Decision</option>
+                <option value="Good">Good (Pass)</option>
+                <option value="Defective">Defective (Reject / Hold)</option>
+                <option value="Uncertain" selected>Uncertain (Requires Lab / Secondary Review)</option>
+              {% else %}
+                <option value="Pending" selected>Pending Decision</option>
+                <option value="Good">Good (Pass)</option>
+                <option value="Defective">Defective (Reject / Hold)</option>
+                <option value="Uncertain">Uncertain (Requires Lab / Secondary Review)</option>
+              {% endif %}
+            </select>
+          </div>
+
+          <!-- Notes Textarea -->
+          <div class="mb-3">
+            <label class="form-label">Disposition Reason / Notes</label>
+            <textarea class="form-control" name="review_note" id="reviewNoteInput" rows="3"
+              placeholder="Provide technical justification, defect dimensions, or acceptance notes...">{{ inspection.review_note }}</textarea>
+            <div class="small text-muted mt-1">If left blank, an auditable confirmation timestamp will be generated
+              automatically.</div>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100">
+            <i class="bi bi-save me-1"></i> Save Disposition Decision
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Corrective Actions Card -->
+    <div class="card shadow-sm">
+      <div class="card-header">
+        <span class="d-flex align-items-center gap-2">
+          <i class="bi bi-tools text-primary"></i>
+          Corrective Actions (CAPA)
+        </span>
+        <span class="badge text-bg-secondary">{{ actions|length }} Linked</span>
+      </div>
+      <div class="card-body">
+        {% for a in actions %}
+        <div class="p-3 rounded bg-surface-elevated border border-secondary border-opacity-25 mb-3">
+          <div class="d-flex justify-content-between align-items-start mb-1">
+            <span class="fw-bold text-light">#{{ a.id }} {{ a.title }}</span>
+            <span class="badge text-bg-dark border border-secondary border-opacity-50">{{ a.status }}</span>
+          </div>
+          <div class="small text-muted mb-2">
+            <i class="bi bi-person me-1"></i> Owner: <span class="text-light">{{ a.owner }}</span> ·
+            <i class="bi bi-calendar me-1"></i> Due: <span class="text-light">{{ a.due_date }}</span>
+          </div>
+          {% if a.notes %}
+          <div class="small p-2 rounded bg-dark text-muted font-monospace">{{ a.notes }}</div>
+          {% endif %}
+        </div>
+        {% else %}
+        <div class="text-muted small py-2">No corrective actions opened for this inspection sample.</div>
+        {% endfor %}
+
+        <!-- Assign Action Form for Supervisor & Manager -->
+        {% if current_role in ['supervisor', 'manager'] %}
+        <hr class="border-secondary border-opacity-25 my-3">
+        <h6 class="fw-bold text-light mb-3">Assign New Corrective Action</h6>
+        <form method="post" action="{{ url_for('create_action', inspection_id=inspection.id) }}">
+          <div class="mb-2">
+            <label class="form-label small">Action Title <span class="text-danger">*</span></label>
+            <input class="form-control form-control-sm" name="title" required
+              placeholder="e.g. Recalibrate die-casting mold pressure">
+          </div>
+          <div class="row g-2 mb-2">
+            <div class="col-sm-6">
+              <label class="form-label small">Assignee Owner <span class="text-danger">*</span></label>
+              <input class="form-control form-control-sm" name="owner" required
+                placeholder="e.g. Lead Machinist / Operator">
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label small">Due Date <span class="text-danger">*</span></label>
+              <input class="form-control form-control-sm" type="date" name="due_date" required>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label small">Action Notes / Instructions</label>
+            <textarea class="form-control form-control-sm" name="notes" rows="2"
+              placeholder="Specific corrective steps required..."></textarea>
+          </div>
+          <button type="submit" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-plus-circle me-1"></i> Assign Action
+          </button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bottom: Audit History -->
+<div class="card shadow-sm mt-4">
+  <div class="card-header">
+    <span class="d-flex align-items-center gap-2">
+      <i class="bi bi-clock-history text-primary"></i>
+      Inspection Lifecycle Audit Log
+    </span>
+  </div>
+  <div class="card-body">
+    <div class="timeline ps-2">
+      {% for h in history %}
+      <div class="timeline-item">
+        <div class="d-flex align-items-center gap-2 mb-1">
+          <span class="fw-bold text-light small">{{ h.actor }}</span>
+          <span class="badge text-bg-dark border border-secondary border-opacity-50 font-monospace small">{{ h.event
+            }}</span>
+          <span class="text-muted small ms-auto">{{ h.created_at }}</span>
+        </div>
+        <div class="small text-muted">{{ h.reason }}</div>
+      </div>
+      {% else %}
+      <div class="text-muted small">No lifecycle events recorded yet.</div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('[data-width-pct]').forEach(el => {
+      el.style.width = el.getAttribute('data-width-pct') + '%';
+    });
+  });
+
+  function quickReview(disposition) {
+    const select = document.getElementById('humanResultSelect');
+    const noteInput = document.getElementById('reviewNoteInput');
+    select.value = disposition;
+    if (!noteInput.value.trim()) {
+      noteInput.value = 'Fast disposition confirmed: ' + disposition;
+    }
+    document.getElementById('reviewForm').submit();
+  }
+</script>
+{% endblock %}
