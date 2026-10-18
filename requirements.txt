@@ -1,0 +1,6 @@
+Flask>=3.0,<4.0
+Pillow>=10.0
+numpy>=1.26,<2.0
+scikit-image>=0.22
+scikit-learn>=1.4
+joblib>=1.3
