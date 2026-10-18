@@ -1,0 +1,11 @@
+venv/
+.venv/
+__pycache__/
+*.pyc
+quality.db
+uploads/*
+!uploads/.gitkeep
+models/*.joblib
+models/*.manifest.json
+data/
+.env

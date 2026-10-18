@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+{% block title %}Quality Reports · QualityTrack{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+  <div>
+    <h1 class="h3 fw-bold mb-1">Evidence-Grounded Quality Report</h1>
+    <p class="text-muted mb-0">Deterministic reports synthesized strictly from database inspection records and corrective action audit trails.</p>
+  </div>
+</div>
+
+<!-- Filter Toolbar -->
+<div class="card shadow-sm mb-4">
+  <div class="card-body">
+    <form method="get" class="row g-3 align-items-center">
+      <div class="col-md-5">
+        <label class="form-label small mb-1">Target Production Batch</label>
+        <select class="form-select" name="batch_code">
+          <option value="">All Production Batches</option>
+          {% for b in batches %}
+          <option value="{{ b.batch_code }}" {% if selected==b.batch_code %}selected{% endif %}>{{ b.batch_code }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3 d-flex align-items-end">
+        <button class="btn btn-outline-primary w-100">
+          <i class="bi bi-funnel me-1"></i> Filter Scope
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Metric Overview Cards -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3">
+    <div class="card stat-card stat-info h-100">
+      <div class="stat-label">Total Inspections</div>
+      <div class="stat-value">{{ summary.inspections }}</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card stat-card stat-warning h-100">
+      <div class="stat-label">Pending Reviews</div>
+      <div class="stat-value text-warning">{{ summary.pending }}</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card stat-card stat-danger h-100">
+      <div class="stat-label">Confirmed Defects</div>
+      <div class="stat-value text-danger">{{ summary.confirmed_defects }}</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card stat-card stat-success h-100">
+      <div class="stat-label">Open Actions</div>
+      <div class="stat-value text-primary">{{ summary.open_actions }}</div>
+    </div>
+  </div>
+</div>
+
+<!-- Report Generator Trigger -->
+<div class="mb-4">
+  <form method="post">
+    <input type="hidden" name="batch_code" value="{{ selected }}">
+    <button type="submit" class="btn btn-primary">
+      <i class="bi bi-file-earmark-check me-1"></i> Generate Grounded Quality Audit Summary
+    </button>
+  </form>
+</div>
+
+<!-- Generated Report Output Box -->
+{% if generated %}
+<div class="card shadow-sm mb-4">
+  <div class="card-header">
+    <span class="d-flex align-items-center gap-2">
+      <i class="bi bi-terminal-fill text-info"></i>
+      Synthesized Quality & Compliance Document
+    </span>
+    <div class="d-flex gap-2">
+      <button class="btn btn-sm btn-outline-secondary" onclick="copyReport()">
+        <i class="bi bi-clipboard me-1"></i> Copy Text
+      </button>
+      <button class="btn btn-sm btn-outline-primary" onclick="window.print()">
+        <i class="bi bi-printer me-1"></i> Print / PDF
+      </button>
+    </div>
+  </div>
+  <div class="card-body">
+    <pre class="report-text" id="reportContent">{{ generated }}</pre>
+  </div>
+</div>
+{% endif %}
+
+<!-- Underlying Traceable Inspection Records -->
+<div class="card shadow-sm">
+  <div class="card-header">
+    <span class="d-flex align-items-center gap-2">
+      <i class="bi bi-database-check text-primary"></i>
+      Underlying Evidence Base ({{ inspections|length }} Records)
+    </span>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-custom">
+      <thead>
+        <tr>
+          <th>Inspection ID</th>
+          <th>Batch Code</th>
+          <th>Sample Ref</th>
+          <th>Machine Vision</th>
+          <th>Human Result</th>
+          <th>Review Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for i in inspections %}
+        <tr>
+          <td>
+            <a href="{{ url_for('inspection_detail', inspection_id=i.id) }}" class="fw-bold text-primary text-decoration-none font-monospace">
+              #{{ i.id }}
+            </a>
+          </td>
+          <td><span class="badge text-bg-dark border border-secondary border-opacity-50 font-monospace">{{ i.batch_code }}</span></td>
+          <td class="font-monospace text-light">{{ i.sample_ref }}</td>
+          <td>
+            {% if i.ml_prediction and i.ml_prediction|lower == 'good' %}
+              <span class="badge-status badge-good">Good</span>
+            {% elif i.ml_prediction and i.ml_prediction|lower == 'defective' %}
+              <span class="badge-status badge-defective">Defective</span>
+            {% else %}
+              <span class="badge-status badge-neutral">Unavailable</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if i.human_result and i.human_result|lower == 'good' %}
+              <span class="badge-status badge-good">Good</span>
+            {% elif i.human_result and i.human_result|lower == 'defective' %}
+              <span class="badge-status badge-defective">Defective</span>
+            {% else %}
+              <span class="badge-status badge-neutral">{{ i.human_result }}</span>
+            {% endif %}
+          </td>
+          <td>
+            <span class="badge text-bg-dark border border-secondary border-opacity-50">{{ i.status }}</span>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="6" class="text-center text-muted py-5">
+            No matching inspections found for selected scope.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function copyReport() {
+  const content = document.getElementById('reportContent').innerText;
+  navigator.clipboard.writeText(content).then(() => {
+    alert('Quality Audit Report copied to clipboard!');
+  });
+}
+</script>
+{% endblock %}

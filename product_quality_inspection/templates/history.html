@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Audit History · QualityTrack{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+  <div>
+    <h1 class="h3 fw-bold mb-1">System Audit & Compliance Log</h1>
+    <p class="text-muted mb-0">Immutable record of all quality dispositions, batch decisions, and user actions.</p>
+  </div>
+</div>
+
+<div class="card shadow-sm">
+  <div class="card-header">
+    <span class="d-flex align-items-center gap-2">
+      <i class="bi bi-shield-lock text-primary"></i>
+      Event Audit Trail
+    </span>
+    <span class="badge text-bg-secondary">{{ history|length }} Events Logged</span>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-custom">
+      <thead>
+        <tr>
+          <th>Timestamp</th>
+          <th>Actor</th>
+          <th>Event Description</th>
+          <th>Entity Reference</th>
+          <th>Reason & Details</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for h in history %}
+        <tr>
+          <td class="font-monospace small text-muted">{{ h.created_at }}</td>
+          <td>
+            <span class="badge text-bg-dark border border-secondary border-opacity-50">
+              <i class="bi bi-person-fill me-1 text-primary"></i>{{ h.actor }}
+            </span>
+          </td>
+          <td class="fw-semibold text-light">{{ h.event }}</td>
+          <td>
+            <span class="badge bg-secondary bg-opacity-25 text-light font-monospace">
+              {{ h.record_type }} #{{ h.record_id }}
+            </span>
+          </td>
+          <td class="text-muted small">{{ h.reason or '—' }}</td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="5" class="text-center text-muted py-5">
+            No history recorded yet.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
