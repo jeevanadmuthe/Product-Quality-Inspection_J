@@ -43,18 +43,9 @@ BASE_DIR = Path(__file__).resolve().parent
 STATIC_DIR = BASE_DIR / "static"
 STATIC_IMAGES_DIR = STATIC_DIR / "images"
 
-# Serverless environment detection (Vercel, AWS Lambda)
-IS_SERVERLESS = bool(os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME"))
-
-if IS_SERVERLESS:
-    # On Vercel / serverless runtime, only /tmp is writable
-    DATA_DIR = Path("/tmp")
-    DB_PATH = DATA_DIR / "quality.db"
-    UPLOAD_DIR = DATA_DIR / "uploads"
-else:
-    DATA_DIR = BASE_DIR
-    DB_PATH = BASE_DIR / "quality.db"
-    UPLOAD_DIR = BASE_DIR / "uploads"
+DATA_DIR = BASE_DIR
+DB_PATH = BASE_DIR / "quality.db"
+UPLOAD_DIR = BASE_DIR / "uploads"
 
 USER_UPLOAD_DIR = UPLOAD_DIR / "user_images"
 AIML_UPLOAD_DIR = UPLOAD_DIR / "aiml"
