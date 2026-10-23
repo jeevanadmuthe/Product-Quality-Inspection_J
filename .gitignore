@@ -9,7 +9,8 @@ data/
 uploads/*
 !uploads/.gitkeep
 quality.db
-quality.db.bak
+*.bak
+*.tmp
 scratch_slides/
 static/b/
 templates/bc/
