@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% set hide_navbar = true %}
 {% block title %}Sign In · QualityTrack{% endblock %}
 
 {% block content %}
@@ -97,6 +98,15 @@
 
 {% block scripts %}
 <script>
+function resetLoginButton() {
+  const btn = document.getElementById('loginSubmitBtn');
+  const icon = document.getElementById('loginSubmitIcon');
+  const label = document.getElementById('loginSubmitLabel');
+  if (btn) btn.disabled = false;
+  if (icon) icon.className = 'bi bi-box-arrow-in-right';
+  if (label) label.textContent = 'Authenticate & Enter';
+}
+
 function quickLogin(user, pass) {
   const btn = document.getElementById('loginSubmitBtn');
   const icon = document.getElementById('loginSubmitIcon');
@@ -112,6 +122,7 @@ function quickLogin(user, pass) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  resetLoginButton();
   const form = document.getElementById('loginForm');
   if (form) {
     form.addEventListener('submit', () => {
@@ -125,6 +136,11 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+});
+
+// Restore button state on back-forward cache navigation
+window.addEventListener('pageshow', () => {
+  resetLoginButton();
 });
 </script>
 {% endblock %}

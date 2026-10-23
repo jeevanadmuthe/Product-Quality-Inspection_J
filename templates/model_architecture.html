@@ -361,6 +361,20 @@ document.addEventListener('DOMContentLoaded', () => {
       dropZone.classList.remove('scanning-beam-active');
       btnRun.disabled = false;
       resultBox.innerHTML = `<div class="reveal-fade-up" style="color: var(--status-defect-text);"><i class="bi bi-wifi-off"></i> Network error communicating with server.</div>`;
+    }
+  });
+
+  function resetModelRunButton() {
+    if (btnRun) {
+      btnRun.disabled = false;
+    }
+    if (dropZone) {
+      dropZone.classList.remove('scanning-beam-active');
+    }
+  }
+
+  window.addEventListener('pageshow', () => {
+    resetModelRunButton();
   });
 
   window.loadLiveSample = async function(filename) {

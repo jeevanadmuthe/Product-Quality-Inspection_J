@@ -392,6 +392,25 @@ function clearSelectedFile() {
   previewSize.textContent = '';
 }
 
+function resetInspectionSubmit() {
+  if (submitBtn) {
+    submitBtn.disabled = false;
+  }
+  if (submitIcon) {
+    submitIcon.className = 'bi bi-cpu';
+  }
+  if (submitLabel) {
+    submitLabel.textContent = 'Submit for AI Screening';
+  }
+  if (previewBox) {
+    previewBox.classList.remove('scanning-beam-active');
+  }
+  const dropzoneBox = document.getElementById('dropzoneBox');
+  if (dropzoneBox) {
+    dropzoneBox.classList.remove('scanning-beam-active');
+  }
+}
+
 function handleInspectionSubmit(e) {
   if (submitBtn.disabled) {
     e.preventDefault();
@@ -406,6 +425,14 @@ function handleInspectionSubmit(e) {
   }
   return true;
 }
+
+// Restore button state on back-forward cache navigation
+window.addEventListener('pageshow', () => {
+  resetInspectionSubmit();
+});
+document.addEventListener('DOMContentLoaded', () => {
+  resetInspectionSubmit();
+});
 
 async function loadDemoSample(filename, sampleRef, obsText) {
   try {

@@ -21,6 +21,7 @@
   <a href="#main-content" class="skip-link">Skip to main content</a>
 
   <!-- Top Application Shell Header -->
+  {% if request.endpoint != 'login' and not hide_navbar %}
   <header class="navbar-clean" role="banner">
     <div class="navbar-container">
       
@@ -115,6 +116,7 @@
 
     </div>
   </header>
+  {% endif %}
 
   <!-- Main Content Shell -->
   <main id="main-content" class="main-wrapper" role="main">
@@ -163,6 +165,13 @@
         toggleBtn.setAttribute('aria-expanded', isOpen);
       });
     }
+  });
+
+  // Global Back-Forward Cache (bfcache) restore handler: ensures buttons are never stuck in loading state on back navigation
+  window.addEventListener('pageshow', (event) => {
+    document.querySelectorAll('button[type="submit"]:disabled').forEach(btn => {
+      btn.disabled = false;
+    });
   });
   </script>
 
