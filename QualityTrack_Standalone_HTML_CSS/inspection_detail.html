@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Inspection Record #104 · QualityTrack</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link href="style.css" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Top Navbar -->
+  <header class="navbar-clean">
+    <div style="max-width: 1220px; margin: 0 auto; padding: 0 20px; display: flex; align-items: center; justify-content: space-between;">
+      
+      <!-- Brand & Navigation -->
+      <div style="display: flex; align-items: center; gap: 32px;">
+        <a class="brand-title" href="dashboard.html">
+          <span class="brand-quality">Quality</span><span class="brand-track">Track</span>
+        </a>
+
+        <nav>
+          <ul class="nav-tabs-clean">
+            <li class="nav-item">
+              <a class="nav-link" href="dashboard.html">Dashboard</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="products.html">Products</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="batches.html">Batches</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" href="inspections.html">Inspections</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">Actions</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">Reports</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">Audit History</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+
+      <!-- Right User Pill -->
+      <div class="user-status-pill">
+        <span class="user-status-dot"></span> Demo user · Manager
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Main Content Wrapper -->
+  <main class="main-wrapper">
+    <!-- Page Header -->
+    <div class="page-header-row">
+      <div>
+        <h1 class="page-title">Inspection Record #104</h1>
+        <p class="page-subtitle">Turbine Impeller Flange · Batch B-105 · Sample SMP-042</p>
+      </div>
+      <div class="header-actions">
+        <a href="inspections.html" class="btn-custom-outline">
+          ← Back to inspections
+        </a>
+      </div>
+    </div>
+
+    <!-- 2-Column Inspection Detail Grid -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start;">
+      
+      <!-- Left Card: Inspection Evidence -->
+      <div class="card-clean" style="min-height: 380px;">
+        <h2 class="card-title-clean" style="margin-bottom: 24px;">Inspection evidence</h2>
+
+        <!-- Evidence Placeholder / Image Area -->
+        <div style="height: 180px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: #64748b; margin-bottom: 24px;">
+          <i class="bi bi-image" style="font-size: 1.8rem; color: #94a3b8; margin-bottom: 12px;"></i>
+          <div style="font-size: 0.95rem; color: #64748b; max-width: 280px; line-height: 1.5;">
+            No sample image is connected in this standalone demo.
+          </div>
+        </div>
+
+        <div style="border-top: 1px solid #e2e8f0; padding-top: 20px;">
+          <div style="font-size: 0.82rem; color: #64748b; margin-bottom: 8px;">Inspector observation</div>
+          <div style="font-size: 0.92rem; color: #0f172a; font-weight: 500;">
+            No initial observation notes recorded.
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Card: Screening and review -->
+      <div class="card-clean" style="min-height: 380px;">
+        <h2 class="card-title-clean" style="margin-bottom: 28px;">Screening and review</h2>
+
+        <!-- AI Screening -->
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 24px;">
+          <span style="font-size: 0.95rem; color: #1e293b; font-weight: 500;">AI screening:</span>
+          <span class="pill-status pill-good">Good</span>
+        </div>
+
+        <!-- Model Confidence -->
+        <div style="margin-bottom: 28px;">
+          <div style="font-size: 0.95rem; color: #1e293b; margin-bottom: 8px;">
+            Model confidence: <strong>98.2%</strong>
+          </div>
+          <div class="quality-progress-track" style="margin: 0; height: 8px;">
+            <div class="quality-progress-bar" style="width: 98.2%;"></div>
+          </div>
+        </div>
+
+        <!-- Human Review -->
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 32px;">
+          <span style="font-size: 0.95rem; color: #1e293b; font-weight: 500;">Human review:</span>
+          <span class="pill-status pill-good">Passed</span>
+        </div>
+
+        <!-- Footnote -->
+        <div style="font-size: 0.82rem; color: #94a3b8;">
+          This is sample content for visual preview only.
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Clean Footer -->
+  <footer class="footer-clean">
+    QualityTrack · Industrial Visual Quality Inspection · Standalone demo interface
+  </footer>
+
+</body>
+</html>

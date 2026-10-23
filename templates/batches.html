@@ -1,147 +1,178 @@
 {% extends "base.html" %}
-{% block title %}Batches · QualityTrack{% endblock %}
+{% block title %}Production Batches · QualityTrack{% endblock %}
 
 {% block content %}
-<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+<!-- Page Header -->
+<div class="page-header-row">
   <div>
-    <h1 class="h3 fw-bold mb-1">Production Batches</h1>
-    <p class="text-muted mb-0">Track manufactured lots, assign samples for inspection, and execute release/hold decisions.</p>
+    <h1 class="page-title">Production Batches</h1>
+    <p class="page-subtitle">Track manufacturing lots, link visual inspection samples, and record authorized release or hold decisions.</p>
+  </div>
+  <div class="header-actions">
+    <span class="user-status-pill">
+      <span>Active Batches: <strong>{{ batches|length }}</strong></span>
+    </span>
   </div>
 </div>
 
-<div class="row g-4">
-  <!-- Register Batch Form -->
-  <div class="col-lg-4">
-    <div class="card shadow-sm">
-      <div class="card-header">
-        <span class="d-flex align-items-center gap-2">
-          <i class="bi bi-plus-circle text-primary"></i>
-          Register Production Batch
-        </span>
-      </div>
-      <div class="card-body">
-        <form method="post">
-          <div class="mb-3">
-            <label class="form-label">Batch Code / Lot Number <span class="text-danger">*</span></label>
-            <input class="form-control" name="batch_code" placeholder="e.g. B-105" required>
-            <div class="small text-muted mt-1">Must be unique per production run.</div>
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label">Target Product Specification <span class="text-danger">*</span></label>
-            <select class="form-select" name="product_id" required>
-              {% for p in products %}
-              <option value="{{ p.id }}">{{ p.name }}</option>
-              {% endfor %}
-            </select>
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label">Lot Quantity (Units) <span class="text-danger">*</span></label>
-            <input class="form-control" type="number" min="1" name="quantity" value="50" required>
-          </div>
-
-          <div class="mb-4">
-            <label class="form-label">Production Run Date <span class="text-danger">*</span></label>
-            <input class="form-control" type="date" name="production_date" required>
-          </div>
-
-          <button type="submit" class="btn btn-primary w-100">
-            <i class="bi bi-check-lg me-1"></i> Create Production Batch
-          </button>
-        </form>
-      </div>
+<div class="two-col-layout">
+  <!-- Left Column: Register Production Batch -->
+  <div class="card-clean">
+    <div class="card-header-clean">
+      <h2 class="card-title-clean">Register Production Batch</h2>
+      <span style="font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono);">LOT MGT</span>
     </div>
+    
+    <form method="post">
+      <div class="form-group-clean">
+        <label class="form-label-clean" for="batchCode">Batch Code / Lot Identifier <span style="color: var(--status-defect-text);">*</span></label>
+        <input class="form-input-clean" name="batch_code" id="batchCode" placeholder="e.g. B-106 or LOT-2026-X1" required>
+      </div>
+
+      <div class="form-group-clean">
+        <label class="form-label-clean" for="productSelect">Product Specification <span style="color: var(--status-defect-text);">*</span></label>
+        <select class="form-select-clean" name="product_id" id="productSelect" required>
+          <option value="" disabled selected>Select manufactured part...</option>
+          {% for p in products %}
+          <option value="{{ p.id }}">{{ p.name }} ({{ p.category }})</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-group-clean">
+        <label class="form-label-clean" for="lotQty">Lot Quantity (Units) <span style="color: var(--status-defect-text);">*</span></label>
+        <input class="form-input-clean" type="number" name="quantity" id="lotQty" value="50" min="1" required>
+      </div>
+
+      <div class="form-group-clean" style="margin-bottom: 24px;">
+        <label class="form-label-clean" for="prodDate">Production Date <span style="color: var(--status-defect-text);">*</span></label>
+        <input class="form-input-clean" type="date" name="production_date" id="prodDate" required>
+      </div>
+
+      <button type="submit" class="form-btn-submit">
+        <i class="bi bi-box-seam"></i> Create Production Batch
+      </button>
+    </form>
   </div>
 
-  <!-- Batches Table -->
-  <div class="col-lg-8">
-    <div class="card shadow-sm h-100">
-      <div class="card-header">
-        <span class="d-flex align-items-center gap-2">
-          <i class="bi bi-layers text-primary"></i>
-          Active Batch Inventory
-        </span>
-        <span class="badge text-bg-secondary">{{ batches|length }} Batches</span>
+  <!-- Right Column: Active Batch Inventory -->
+  <div class="card-clean">
+    <div class="card-header-clean">
+      <div>
+        <h2 class="card-title-clean">Active Batch Inventory</h2>
+        <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 2px;">
+          {{ batches|length }} total lots registered in current production run
+        </div>
       </div>
-      <div class="table-responsive">
-        <table class="table table-custom">
-          <thead>
-            <tr>
-              <th>Batch Code</th>
-              <th>Product Line</th>
-              <th>Quantity</th>
-              <th>Inspections</th>
-              <th>Status & Dispositions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for b in batches %}
-            <tr>
-              <td>
-                <span class="badge text-bg-dark border border-secondary border-opacity-50 font-monospace fs-6">{{ b.batch_code }}</span>
-                <div class="small text-muted mt-1">{{ b.production_date }}</div>
-              </td>
-              <td>
-                <span class="fw-semibold text-light">{{ b.product_name }}</span>
-              </td>
-              <td class="font-monospace text-light">{{ b.quantity }} units</td>
-              <td>
-                <div class="d-flex align-items-center gap-2">
-                  <span class="badge bg-secondary bg-opacity-25 text-light">{{ b.inspection_count }} inspected</span>
-                  {% if b.defect_count and b.defect_count > 0 %}
-                    <span class="badge bg-danger bg-opacity-25 text-danger border border-danger border-opacity-25">{{ b.defect_count }} defect</span>
-                  {% endif %}
+    </div>
+
+    {% if batches %}
+    <div style="overflow-x: auto;">
+      <table class="table-clean">
+        <thead>
+          <tr>
+            <th style="width: 14%;">BATCH CODE</th>
+            <th style="width: 26%;">PRODUCT SPECIFICATION</th>
+            <th style="width: 14%;">LOT SIZE</th>
+            <th style="width: 20%;">INSPECTIONS</th>
+            <th style="width: 14%;">DISPOSITION</th>
+            <th style="width: 12%; text-align: right;">ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for b in batches %}
+          <tr>
+            <td>
+              <strong style="color: var(--text-primary); font-family: var(--font-mono); font-size: 0.9rem;">
+                {{ b.batch_code }}
+              </strong>
+              <div style="font-size: 0.74rem; color: var(--text-muted);">{{ b.production_date or b.created_at[:10] }}</div>
+            </td>
+            <td>
+              <div style="font-weight: 500; color: var(--text-primary);">{{ b.product_name }}</div>
+            </td>
+            <td style="color: var(--text-secondary); font-family: var(--font-mono);">
+              {{ b.quantity }} units
+            </td>
+            <td>
+              <a href="{{ url_for('inspections', batch_id=b.id) }}" class="table-link" style="font-weight: 500;">
+                {{ b.inspection_count }} inspected
+              </a>
+              {% if b.defect_count and b.defect_count > 0 %}
+                <span class="pill-status pill-defective" style="font-size: 0.7rem; padding: 1px 6px; margin-left: 4px;">
+                  {{ b.defect_count }} defect{{ 's' if b.defect_count > 1 else '' }}
+                </span>
+              {% endif %}
+            </td>
+            <td>
+              {% if b.status|lower == 'released' %}
+                <span class="pill-status pill-released">Released</span>
+              {% elif b.status|lower in ['hold', 'on hold'] %}
+                <span class="pill-status pill-hold">On hold</span>
+              {% else %}
+                <span class="pill-status pill-open">Open</span>
+              {% endif %}
+              
+              {% if b.decision_note %}
+              <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 2px; max-width: 130px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="{{ b.decision_note }}">
+                {{ b.decision_note }}
+              </div>
+              {% endif %}
+            </td>
+            <td style="text-align: right;">
+              {% if current_role == 'manager' %}
+              <details style="position: relative; display: inline-block;">
+                <summary class="btn-custom-outline" style="padding: 5px 10px; font-size: 0.78rem; cursor: pointer; list-style: none; display: inline-flex; align-items: center; gap: 6px;" data-tooltip="Authorize lot release or quarantine">
+                  <span>Decide</span>
+                  <i class="bi bi-chevron-down"></i>
+                </summary>
+                <div style="position: absolute; right: 0; top: 100%; margin-top: 4px; background: var(--bg-surface); border: 1px solid var(--border-hairline); border-radius: var(--radius-sm); padding: 12px; box-shadow: var(--shadow-dropdown); z-index: 50; width: 240px; text-align: left;">
+                  <form method="post" action="{{ url_for('batch_decision', batch_id=b.id) }}">
+                    <div style="font-size: 0.78rem; font-weight: 600; color: var(--text-primary); margin-bottom: 8px;">
+                      Update Batch #{{ b.batch_code }}
+                    </div>
+                    <select class="form-select-clean" name="status" style="font-size: 0.8rem; padding: 4px 8px; margin-bottom: 8px;">
+                      <option value="Open" {% if b.status == 'Open' %}selected{% endif %}>Open</option>
+                      <option value="Hold" {% if b.status == 'Hold' %}selected{% endif %}>On Hold</option>
+                      <option value="Released" {% if b.status == 'Released' %}selected{% endif %}>Released</option>
+                    </select>
+                    <input class="form-input-clean" name="note" placeholder="Auditable reason..." required style="font-size: 0.78rem; padding: 4px 8px; margin-bottom: 8px;" value="{{ b.decision_note or '' }}">
+                    <button type="submit" class="btn-custom-primary" style="font-size: 0.78rem; padding: 5px 10px; width: 100%; justify-content: center;">
+                      <i class="bi bi-check2"></i> Confirm Decision
+                    </button>
+                  </form>
                 </div>
-              </td>
-              <td>
-                {% if b.status == 'Released' %}
-                  <span class="badge-status badge-good mb-1">Released</span>
-                {% elif b.status == 'Hold' %}
-                  <span class="badge-status badge-defective mb-1">On Hold</span>
-                {% else %}
-                  <span class="badge-status badge-neutral mb-1">Open</span>
-                {% endif %}
-
-                {% if b.decision_note %}
-                  <div class="small text-muted text-truncate" style="max-width: 180px;" title="{{ b.decision_note }}">
-                    <i class="bi bi-chat-left-text me-1"></i>{{ b.decision_note }}
-                  </div>
-                {% endif %}
-
-                <!-- Manager Decision Modal/Form -->
-                {% if current_role == 'manager' %}
-                <form method="post" action="{{ url_for('batch_decision', batch_id=b.id) }}" class="mt-2 p-2 rounded bg-surface-elevated border border-secondary border-opacity-25">
-                  <div class="row g-1">
-                    <div class="col-sm-5">
-                      <select class="form-select form-select-sm" name="status">
-                        <option value="Open" {% if b.status=='Open' %}selected{% endif %}>Open</option>
-                        <option value="Hold" {% if b.status=='Hold' %}selected{% endif %}>Hold</option>
-                        <option value="Released" {% if b.status=='Released' %}selected{% endif %}>Released</option>
-                      </select>
-                    </div>
-                    <div class="col-sm-7">
-                      <input class="form-control form-control-sm" name="note" placeholder="Auditable reason..." required>
-                    </div>
-                  </div>
-                  <button class="btn btn-sm btn-outline-primary w-100 mt-1 py-0" style="font-size: 0.78rem;">
-                    Record Decision
-                  </button>
-                </form>
-                {% endif %}
-              </td>
-            </tr>
-            {% else %}
-            <tr>
-              <td colspan="5" class="text-center text-muted py-5">
-                No batches created yet.
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
+              </details>
+              {% else %}
+              <a href="{{ url_for('inspections', batch_id=b.id) }}" class="table-link" data-tooltip="View inspections for lot {{ b.batch_code }}" style="font-size: 0.82rem;">
+                View →
+              </a>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
+    {% else %}
+    <div class="empty-state-box">
+      <i class="bi bi-box empty-state-icon"></i>
+      <div class="empty-state-title">No production batches found</div>
+      <div class="empty-state-desc">Register your first production lot using the form on the left.</div>
+    </div>
+    {% endif %}
   </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Default production date to today if empty
+document.addEventListener('DOMContentLoaded', () => {
+  const prodDate = document.getElementById('prodDate');
+  if (prodDate && !prodDate.value) {
+    prodDate.value = new Date().toISOString().split('T')[0];
+  }
+});
+</script>
 {% endblock %}

@@ -2,91 +2,95 @@
 {% block title %}Sign In · QualityTrack{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center mt-4">
-  <div class="col-md-7 col-lg-5">
-    <div class="card shadow-lg border-0" style="background: rgba(21, 27, 38, 0.95); backdrop-filter: blur(20px);">
-      <div class="card-body p-4 p-sm-5">
-        <div class="text-center mb-4">
-          <div class="brand-icon mx-auto mb-3" style="width: 48px; height: 48px;">
-            <i class="bi bi-shield-check text-white fs-3"></i>
-          </div>
-          <h2 class="h4 fw-bold mb-1">Quality Inspection Portal</h2>
-          <p class="text-muted small">Sign in to record visual inspections, review defect classifications, and issue corrective actions.</p>
-        </div>
-
-        <form method="post" id="loginForm">
-          <div class="mb-3">
-            <label class="form-label">Username</label>
-            <div class="input-group">
-              <span class="input-group-text bg-surface-elevated border-secondary border-opacity-25 text-muted">
-                <i class="bi bi-person"></i>
-              </span>
-              <input class="form-control" name="username" id="usernameInput" placeholder="e.g. inspector" required autofocus>
-            </div>
-          </div>
-
-          <div class="mb-4">
-            <label class="form-label">Password</label>
-            <div class="input-group">
-              <span class="input-group-text bg-surface-elevated border-secondary border-opacity-25 text-muted">
-                <i class="bi bi-lock"></i>
-              </span>
-              <input class="form-control" type="password" name="password" id="passwordInput" placeholder="••••••••" required>
-            </div>
-          </div>
-
-          <button class="btn btn-primary w-100 py-2 fw-semibold mb-4">
-            <i class="bi bi-box-arrow-in-right me-1"></i> Sign In to QualityTrack
-          </button>
-        </form>
-
-        <div class="text-center text-muted small fw-semibold text-uppercase mb-3" style="letter-spacing: 0.05em;">
-          — Quick One-Click Demo Access —
-        </div>
-
-        <div class="d-flex flex-column gap-2">
-          <div class="quick-login-card d-flex align-items-center justify-content-between" onclick="quickLogin('inspector', 'inspect123')">
-            <div class="d-flex align-items-center gap-3">
-              <div class="p-2 rounded bg-primary bg-opacity-10 text-primary">
-                <i class="bi bi-search fs-5"></i>
-              </div>
-              <div>
-                <div class="fw-bold text-light small">Quality Inspector</div>
-                <div class="text-muted" style="font-size: 0.78rem;">Upload images, run machine screening, record observations</div>
-              </div>
-            </div>
-            <i class="bi bi-arrow-right text-muted"></i>
-          </div>
-
-          <div class="quick-login-card d-flex align-items-center justify-content-between" onclick="quickLogin('supervisor', 'super123')">
-            <div class="d-flex align-items-center gap-3">
-              <div class="p-2 rounded bg-warning bg-opacity-10 text-warning">
-                <i class="bi bi-shield-check fs-5"></i>
-              </div>
-              <div>
-                <div class="fw-bold text-light small">Quality Supervisor</div>
-                <div class="text-muted" style="font-size: 0.78rem;">Perform human reviews, assign corrective actions (CAPA)</div>
-              </div>
-            </div>
-            <i class="bi bi-arrow-right text-muted"></i>
-          </div>
-
-          <div class="quick-login-card d-flex align-items-center justify-content-between" onclick="quickLogin('manager', 'manager123')">
-            <div class="d-flex align-items-center gap-3">
-              <div class="p-2 rounded bg-danger bg-opacity-10 text-danger">
-                <i class="bi bi-award fs-5"></i>
-              </div>
-              <div>
-                <div class="fw-bold text-light small">Quality Manager</div>
-                <div class="text-muted" style="font-size: 0.78rem;">Batch release/hold dispositions, audit log & quality reports</div>
-              </div>
-            </div>
-            <i class="bi bi-arrow-right text-muted"></i>
-          </div>
-        </div>
-
+<div style="max-width: 440px; margin: 48px auto;">
+  <div class="card-clean" style="padding: 32px 28px;">
+    
+    <div style="text-align: center; margin-bottom: 24px;">
+      <div style="display: inline-flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+        <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: var(--radius-sm); background-color: var(--text-primary); color: var(--bg-surface); font-weight: 800; font-size: 0.88rem; font-family: var(--font-mono);">
+          QT
+        </span>
+        <span style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary); letter-spacing: -0.02em;">
+          Quality<span style="color: var(--accent-primary);">Track</span>
+        </span>
       </div>
+      <h1 style="font-size: 1.15rem; font-weight: 600; color: var(--text-primary); margin: 0 0 4px;">
+        Industrial Quality System Sign In
+      </h1>
+      <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0;">
+        Access defect screening, batch dispositions, and CAPA logs.
+      </p>
     </div>
+
+    <!-- Login Form -->
+    <form method="post" id="loginForm">
+      <div class="form-group-clean">
+        <label class="form-label-clean" for="usernameInput">Operator ID / Username</label>
+        <input class="form-input-clean" name="username" id="usernameInput" placeholder="e.g. manager" required autofocus autocomplete="username">
+      </div>
+
+      <div class="form-group-clean" style="margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+          <label class="form-label-clean" for="passwordInput" style="margin: 0;">Access Key / Password</label>
+        </div>
+        <input class="form-input-clean" type="password" name="password" id="passwordInput" placeholder="••••••••" required autocomplete="current-password">
+      </div>
+
+      <button type="submit" class="form-btn-submit" id="loginSubmitBtn">
+        <i class="bi bi-box-arrow-in-right" id="loginSubmitIcon"></i>
+        <span id="loginSubmitLabel">Authenticate & Enter</span>
+      </button>
+    </form>
+
+    <!-- Quick Role Switcher -->
+    <div style="text-align: center; color: var(--text-muted); font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin: 24px 0 12px;">
+      — Pre-configured Operator Profiles —
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <!-- Manager -->
+      <button type="button" onclick="quickLogin('manager', 'manager123')" class="quick-login-card" data-tooltip="Plant Quality Manager · Full authority">
+        <div>
+          <div style="font-weight: 600; color: var(--text-primary); font-size: 0.84rem; display: flex; align-items: center; gap: 6px;">
+            <i class="bi bi-shield-lock" style="color: var(--accent-primary);"></i>
+            Plant Quality Manager
+          </div>
+          <div style="color: var(--text-muted); font-size: 0.74rem;">
+            Full release authorization, compliance reports & audit logs
+          </div>
+        </div>
+        <span class="quick-arrow">Select <i class="bi bi-arrow-right"></i></span>
+      </button>
+
+      <!-- Supervisor -->
+      <button type="button" onclick="quickLogin('supervisor', 'super123')" class="quick-login-card" data-tooltip="Quality Supervisor · Dispositions & CAPA">
+        <div>
+          <div style="font-weight: 600; color: var(--text-primary); font-size: 0.84rem; display: flex; align-items: center; gap: 6px;">
+            <i class="bi bi-shield-check" style="color: var(--status-review-dot);"></i>
+            Quality Supervisor
+          </div>
+          <div style="color: var(--text-muted); font-size: 0.74rem;">
+            Review sign-offs, disposition approvals & CAPA assignments
+          </div>
+        </div>
+        <span class="quick-arrow">Select <i class="bi bi-arrow-right"></i></span>
+      </button>
+
+      <!-- Inspector -->
+      <button type="button" onclick="quickLogin('inspector', 'inspect123')" class="quick-login-card" data-tooltip="Line Quality Inspector · Visual inspections">
+        <div>
+          <div style="font-weight: 600; color: var(--text-primary); font-size: 0.84rem; display: flex; align-items: center; gap: 6px;">
+            <i class="bi bi-camera-viewfinder" style="color: var(--status-good-dot);"></i>
+            Line Quality Inspector
+          </div>
+          <div style="color: var(--text-muted); font-size: 0.74rem;">
+            Sample registration, optical image upload & AI screening
+          </div>
+        </div>
+        <span class="quick-arrow">Select <i class="bi bi-arrow-right"></i></span>
+      </button>
+    </div>
+
   </div>
 </div>
 {% endblock %}
@@ -94,9 +98,33 @@
 {% block scripts %}
 <script>
 function quickLogin(user, pass) {
+  const btn = document.getElementById('loginSubmitBtn');
+  const icon = document.getElementById('loginSubmitIcon');
+  const label = document.getElementById('loginSubmitLabel');
+  if (btn && icon && label) {
+    btn.disabled = true;
+    icon.className = 'spinner-border spinner-border-sm';
+    label.textContent = 'Authenticating ' + user + '...';
+  }
   document.getElementById('usernameInput').value = user;
   document.getElementById('passwordInput').value = pass;
   document.getElementById('loginForm').submit();
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('loginForm');
+  if (form) {
+    form.addEventListener('submit', () => {
+      const btn = document.getElementById('loginSubmitBtn');
+      const icon = document.getElementById('loginSubmitIcon');
+      const label = document.getElementById('loginSubmitLabel');
+      if (btn && icon && label) {
+        btn.disabled = true;
+        icon.className = 'spinner-border spinner-border-sm';
+        label.textContent = 'Authenticating...';
+      }
+    });
+  }
+});
 </script>
 {% endblock %}

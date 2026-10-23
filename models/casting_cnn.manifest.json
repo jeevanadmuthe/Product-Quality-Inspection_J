@@ -1,0 +1,135 @@
+{
+  "model_version": "casting-cnn-deeplearning-v1",
+  "classifier_type": "cnn",
+  "framework": "PyTorch 2.2.1+cpu",
+  "architecture_name": "CastingInspectionCNN",
+  "train_count": 6633,
+  "test_count": 715,
+  "test_accuracy": 0.9986,
+  "metrics": {
+    "accuracy": 0.9986,
+    "defective_precision": 1.0,
+    "defective_recall": 0.9978,
+    "defective_f1": 0.9989,
+    "good_precision": 0.9962,
+    "good_recall": 1.0,
+    "good_f1": 0.9981
+  },
+  "confusion_matrix": [
+    [
+      452,
+      1
+    ],
+    [
+      0,
+      262
+    ]
+  ],
+  "epochs_trained": 5,
+  "batch_size": 32,
+  "initial_lr": 0.0005,
+  "trainable_parameters": 1107810,
+  "labels": [
+    "defective",
+    "good"
+  ],
+  "training_history": [
+    {
+      "epoch": 1,
+      "train_loss": 0.4035,
+      "train_acc": 0.8313,
+      "val_loss": 0.7629,
+      "val_acc": 0.649,
+      "lr": 0.0004523497400965494,
+      "duration_sec": 271.09
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.2413,
+      "train_acc": 0.9429,
+      "val_loss": 0.191,
+      "val_acc": 0.9161,
+      "lr": 0.0003275997400965494,
+      "duration_sec": 283.84
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.1779,
+      "train_acc": 0.9809,
+      "val_loss": 0.0623,
+      "val_acc": 0.9972,
+      "lr": 0.0001734002599034506,
+      "duration_sec": 284.52
+    },
+    {
+      "epoch": 4,
+      "train_loss": 0.1564,
+      "train_acc": 0.9923,
+      "val_loss": 0.0576,
+      "val_acc": 0.9986,
+      "lr": 4.8650259903450626e-05,
+      "duration_sec": 283.46
+    },
+    {
+      "epoch": 5,
+      "train_loss": 0.1503,
+      "train_acc": 0.9929,
+      "val_loss": 0.0456,
+      "val_acc": 0.9986,
+      "lr": 1e-06,
+      "duration_sec": 289.31
+    }
+  ],
+  "trained_at": "2026-10-22 23:18:09",
+  "total_training_duration_sec": 1423.33,
+  "architecture_summary": {
+    "model_family": "Convolutional Neural Network (CNN)",
+    "framework": "PyTorch 2.2+",
+    "input_dimensions": "128 x 128 x 3 (RGB)",
+    "trainable_parameters": 914050,
+    "stages": [
+      {
+        "name": "Input Layer",
+        "output_shape": "3 x 128 x 128",
+        "receptive_field": "1x1",
+        "description": "Raw RGB image normalized with ImageNet mean/std distribution."
+      },
+      {
+        "name": "Conv Block 1 (Dual Conv3x3)",
+        "output_shape": "32 x 64 x 64",
+        "receptive_field": "6x6",
+        "description": "Low-level feature extraction: Surface edges, specular reflection boundaries, and lighting gradients."
+      },
+      {
+        "name": "Conv Block 2 (Dual Conv3x3)",
+        "output_shape": "64 x 32 x 32",
+        "receptive_field": "14x14",
+        "description": "Mid-level texture features: Metallic grain texture, surface roughness, and localized porosity."
+      },
+      {
+        "name": "Conv Block 3 (Dual Conv3x3)",
+        "output_shape": "128 x 16 x 16",
+        "receptive_field": "30x30",
+        "description": "Geometric defect synthesis: Pinholes, tool chatter marks, parting line seams, and surface fissures."
+      },
+      {
+        "name": "Conv Block 4 (Conv3x3 + Pool)",
+        "output_shape": "256 x 8 x 8",
+        "receptive_field": "46x46",
+        "description": "High-level defect topology: Shrinkage cavities, blowholes, cold shuts, and structural perimeter cracks."
+      },
+      {
+        "name": "Adaptive Average Pooling",
+        "output_shape": "256 x 4 x 4",
+        "receptive_field": "128x128",
+        "description": "Spatial compression providing translation invariance across slightly misaligned inspection samples."
+      },
+      {
+        "name": "Dense Regularized Classifier",
+        "output_shape": "2 (Defective vs Good)",
+        "receptive_field": "Full",
+        "description": "Dropout (0.35) + BatchNorm1d + Linear(4096 -> 128) + ReLU + Linear(128 -> 2) with Softmax posterior."
+      }
+    ]
+  }
+}

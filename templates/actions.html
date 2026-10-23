@@ -1,112 +1,163 @@
 {% extends "base.html" %}
-{% block title %}Corrective Actions · QualityTrack{% endblock %}
+{% block title %}Corrective Actions (CAPA) · QualityTrack{% endblock %}
 
 {% block content %}
-<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
-    <div>
-        <h1 class="h3 fw-bold mb-1">Corrective & Preventive Actions (CAPA)</h1>
-        <p class="text-muted mb-0">Track defect mitigation, assign work orders, and review completion audit logs.</p>
-    </div>
+<!-- Page Header -->
+<div class="page-header-row">
+  <div>
+    <h1 class="page-title">Corrective & Preventive Actions (CAPA)</h1>
+    <p class="page-subtitle">Track defect containment, assign tooling adjustments, and record auditable resolution logs.</p>
+  </div>
+  <div class="header-actions">
+    <span class="user-status-pill">
+      <span>Total Actions: <strong>{{ actions|length }}</strong></span>
+    </span>
+  </div>
 </div>
 
-<div class="card shadow-sm">
-    <div class="card-header">
-        <span class="d-flex align-items-center gap-2">
-            <i class="bi bi-clipboard-check text-primary"></i>
-            Action Register
-        </span>
-        <span class="badge text-bg-secondary">{{ actions|length }} Actions</span>
+<div class="card-clean">
+  <div class="card-header-clean">
+    <div>
+      <h2 class="card-title-clean">Quality Action Register</h2>
+      <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 2px;">
+        {{ actions|length }} corrective orders linked to non-conforming casting samples
+      </div>
     </div>
-    <div class="table-responsive">
-        <table class="table table-custom">
-            <thead>
-                <tr>
-                    <th>Action ID</th>
-                    <th>Batch & Sample Reference</th>
-                    <th>Action Title & Defect Context</th>
-                    <th>Assigned Owner</th>
-                    <th>Due Date</th>
-                    <th>Status & Disposition</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for a in actions %}
-                <tr>
-                    <td class="fw-bold text-light">#{{ a.id }}</td>
-                    <td>
-                        <div class="fw-semibold text-light">{{ a.batch_code }}</div>
-                        <a href="{{ url_for('inspection_detail', inspection_id=a.inspection_id) }}"
-                            class="small text-primary text-decoration-none font-monospace">
-                            <i class="bi bi-box-arrow-up-right me-1"></i>Sample: {{ a.sample_ref }}
-                        </a>
-                    </td>
-                    <td>
-                        <div class="fw-bold text-light mb-1">{{ a.title }}</div>
-                        <div class="small text-muted">
-                            Inspection Result:
-                            {% if a.human_result and a.human_result|lower == 'defective' %}
-                            <span class="badge-status badge-defective" style="font-size: 0.72rem;">Defective</span>
-                            {% else %}
-                            <span class="badge-status badge-neutral" style="font-size: 0.72rem;">{{ a.human_result
-                                }}</span>
-                            {% endif %}
-                        </div>
-                        {% if a.notes %}
-                        <div class="small p-2 rounded bg-surface-elevated border border-secondary border-opacity-25 mt-2 font-monospace text-muted"
-                            style="white-space: pre-line; max-width: 400px;">
-                            {{ a.notes }}
-                        </div>
-                        {% endif %}
-                    </td>
-                    <td>
-                        <span class="badge text-bg-dark border border-secondary border-opacity-50">
-                            <i class="bi bi-person me-1"></i>{{ a.owner }}
-                        </span>
-                    </td>
-                    <td class="font-monospace small text-light">{{ a.due_date }}</td>
-                    <td>
-                        {% if a.status == 'Completed' %}
-                        <span class="badge-status badge-good mb-1">Completed</span>
-                        {% elif a.status == 'In progress' %}
-                        <span class="badge-status badge-pending mb-1">In Progress</span>
-                        {% elif a.status == 'Reopened' %}
-                        <span class="badge-status badge-defective mb-1">Reopened</span>
-                        {% else %}
-                        <span class="badge-status badge-neutral mb-1">Open</span>
-                        {% endif %}
+  </div>
 
-                        {% if current_role in ['supervisor', 'manager'] %}
-                        <form method="post" action="{{ url_for('action_status', action_id=a.id) }}"
-                            class="mt-2 p-2 rounded bg-surface-elevated border border-secondary border-opacity-25"
-                            style="max-width: 240px;">
-                            <select class="form-select form-select-sm mb-1" name="status">
-                                <option value="Open" {% if a.status=='Open' %}selected{% endif %}>Open</option>
-                                <option value="In progress" {% if a.status=='In progress' %}selected{% endif %}>In
-                                    progress</option>
-                                <option value="Completed" {% if a.status=='Completed' %}selected{% endif %}>Completed
-                                </option>
-                                <option value="Reopened" {% if a.status=='Reopened' %}selected{% endif %}>Reopened
-                                </option>
-                            </select>
-                            <input class="form-control form-control-sm mb-1" name="note"
-                                placeholder="Status change reason..." required>
-                            <button class="btn btn-sm btn-outline-primary w-100 py-0" style="font-size: 0.78rem;">
-                                Update Status
-                            </button>
-                        </form>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% else %}
-                <tr>
-                    <td colspan="6" class="text-center text-muted py-5">
-                        <i class="bi bi-check2-circle fs-2 d-block mb-2 text-dim"></i>
-                        No corrective actions logged. Good job! Actions can be assigned from the inspection detail page.
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+  {% if actions %}
+  <div style="overflow-x: auto;">
+    <table class="table-clean">
+      <thead>
+        <tr>
+          <th style="width: 10%;">ACTION ID</th>
+          <th style="width: 22%;">BATCH & SAMPLE</th>
+          <th style="width: 30%;">ACTION TITLE & RESOLUTION SCOPE</th>
+          <th style="width: 14%;">ASSIGNEE</th>
+          <th style="width: 12%;">TARGET DATE</th>
+          <th style="width: 12%;">STATUS</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for a in actions %}
+        <tr>
+          <td style="color: var(--text-muted); font-family: var(--font-mono); font-weight: 600;">
+            #{{ a.id }}
+          </td>
+          <td>
+            <div style="font-weight: 600; color: var(--text-primary);">
+              Lot {{ a.batch_code }}
+            </div>
+            <a href="{{ url_for('inspection_detail', inspection_id=a.inspection_id) }}" class="table-link" data-tooltip="Inspect defective sample {{ a.sample_ref }}" style="font-size: 0.8rem;">
+              Sample: {{ a.sample_ref }} →
+            </a>
+          </td>
+          <td>
+            <strong style="color: var(--text-primary); font-size: 0.88rem; display: block; margin-bottom: 2px;">
+              {{ a.title }}
+            </strong>
+            <div style="font-size: 0.76rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px;">
+              <span>Casting Anomaly:</span>
+              {% if a.human_result and a.human_result|lower == 'defective' %}
+              <span class="pill-status pill-defective" style="font-size: 0.7rem; padding: 1px 6px;">
+                <i class="bi bi-exclamation-octagon-fill"></i> Defective
+              </span>
+              {% else %}
+              <span class="pill-status pill-good" style="font-size: 0.7rem; padding: 1px 6px;">
+                <i class="bi bi-check-circle-fill"></i> {{ a.human_result }}
+              </span>
+              {% endif %}
+            </div>
+            {% if a.corrective_work %}
+            <div style="font-size: 0.78rem; color: var(--text-primary); background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.25); border-radius: var(--radius-xs); padding: 5px 8px; margin-top: 6px;">
+              <strong style="color: var(--accent-primary);">Corrective Work:</strong> {{ a.corrective_work }}
+            </div>
+            {% endif %}
+            {% if a.evidence_image %}
+            <div style="margin-top: 6px;">
+              <a href="{{ url_for('uploaded_file', filename=a.evidence_image) }}" target="_blank" class="table-link" style="display: inline-flex; align-items: center; gap: 4px; font-size: 0.76rem; background: var(--bg-hover); padding: 3px 6px; border-radius: var(--radius-xs); border: 1px solid var(--border-hairline);">
+                <i class="bi bi-paperclip" style="color: var(--status-good-dot);"></i> Follow-up Evidence Attached →
+              </a>
+            </div>
+            {% endif %}
+            {% if a.notes %}
+            <div style="font-size: 0.78rem; color: var(--text-secondary); background: var(--bg-hover); border: 1px solid var(--border-hairline); border-radius: var(--radius-xs); padding: 6px 10px; margin-top: 6px;">
+              {{ a.notes }}
+            </div>
+            {% endif %}
+          </td>
+          <td>
+            <span class="user-status-pill" style="font-size: 0.76rem; padding: 2px 8px;">
+              <i class="bi bi-person"></i> {{ a.owner }}
+            </span>
+          </td>
+          <td style="font-family: var(--font-mono); font-size: 0.82rem; color: var(--text-secondary);">
+            {{ a.due_date }}
+          </td>
+          <td>
+            {% if a.status == 'Completed' %}
+              <span class="pill-status pill-released" style="margin-bottom: 6px; display: inline-flex; align-items: center; gap: 4px;">
+                <i class="bi bi-check-circle-fill"></i> Completed
+              </span>
+            {% elif a.status == 'In progress' %}
+              <span class="pill-status pill-review" style="margin-bottom: 6px; display: inline-flex; align-items: center; gap: 4px;">
+                <i class="bi bi-hourglass-split"></i> In progress
+              </span>
+            {% elif a.status == 'Reopened' %}
+              <span class="pill-status pill-hold" style="margin-bottom: 6px; display: inline-flex; align-items: center; gap: 4px;">
+                <i class="bi bi-exclamation-triangle-fill"></i> Reopened
+              </span>
+            {% else %}
+              <span class="pill-status pill-open" style="margin-bottom: 6px; display: inline-flex; align-items: center; gap: 4px;">
+                <i class="bi bi-circle"></i> Open
+              </span>
+            {% endif %}
+
+            {% if current_role in ['supervisor', 'manager'] %}
+            <details style="margin-top: 6px;">
+              <summary style="font-size: 0.74rem; font-weight: 600; color: var(--accent-primary); cursor: pointer; user-select: none;">
+                <i class="bi bi-pencil-square"></i> Record Work / Evidence
+              </summary>
+              <form method="post" action="{{ url_for('action_status', action_id=a.id) }}" enctype="multipart/form-data" style="margin-top: 6px; padding: 8px; background: var(--bg-hover); border: 1px solid var(--border-hairline); border-radius: var(--radius-xs);">
+                <div style="margin-bottom: 4px;">
+                  <label style="font-size: 0.7rem; color: var(--text-muted); display: block;">Status</label>
+                  <select class="form-select-clean" name="status" style="font-size: 0.74rem; padding: 2px 4px;" aria-label="Action status">
+                    <option value="Open" {% if a.status=='Open' %}selected{% endif %}>Open</option>
+                    <option value="In progress" {% if a.status=='In progress' %}selected{% endif %}>In progress</option>
+                    <option value="Completed" {% if a.status=='Completed' %}selected{% endif %}>Completed</option>
+                    <option value="Reopened" {% if a.status=='Reopened' %}selected{% endif %}>Reopened</option>
+                  </select>
+                </div>
+                <div style="margin-bottom: 4px;">
+                  <label style="font-size: 0.7rem; color: var(--text-muted); display: block;">Corrective Work Performed</label>
+                  <textarea class="form-textarea-clean" name="corrective_work" rows="1" placeholder="e.g. Die cavity cleaned..." style="font-size: 0.74rem; padding: 3px 6px;">{{ a.corrective_work or '' }}</textarea>
+                </div>
+                <div style="margin-bottom: 4px;">
+                  <label style="font-size: 0.7rem; color: var(--text-muted); display: block;">Audit Note</label>
+                  <input class="form-input-clean" name="note" placeholder="Status change memo..." style="font-size: 0.74rem; padding: 2px 4px;">
+                </div>
+                <div style="margin-bottom: 6px;">
+                  <label style="font-size: 0.7rem; color: var(--text-muted); display: block;">Submit Follow-up Evidence</label>
+                  <input type="file" name="evidence_file" accept=".png,.jpg,.jpeg,.webp" style="font-size: 0.7rem; width: 100%;">
+                </div>
+                <button type="submit" class="btn-custom-primary" style="font-size: 0.72rem; padding: 4px 8px; width: 100%; justify-content: center;">
+                  <i class="bi bi-check2"></i> Save Work & Evidence
+                </button>
+              </form>
+            </details>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state-box">
+    <i class="bi bi-clipboard-check empty-state-icon"></i>
+    <div class="empty-state-title">No corrective actions logged</div>
+    <div class="empty-state-desc">Corrective action orders can be created directly from any defective sample inspection detail page.</div>
+  </div>
+  {% endif %}
 </div>
 {% endblock %}

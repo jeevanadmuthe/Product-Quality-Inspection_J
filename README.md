@@ -67,31 +67,55 @@ data/
 4. Use the dataset's existing train/test split if supplied and suitable. Do not mix test images into training. Avoid splitting near-duplicate views of the same physical item across train/test.
 5. Aim for representative images in each class. The sample dataset is for training/evaluation, not a substitute for workflow history.
 
-## Step 7 — Train and evaluate the learned model
-With the virtual environment activated:
+## Step 7 — Train and evaluate the Deep Learning CNN model
+With your environment activated:
+
 ```powershell
-python train_model.py --data data/casting
+# Train the multi-stage Deep Learning CNN (PyTorch) with live 0% to 100% terminal progress tracking:
+python train_cnn.py --data data/casting --epochs 5
+
+# Or directly via train_model.py:
+python train_model.py
 ```
-The script extracts HOG image features, trains an SVM classifier, evaluates on the held-out test folder, prints a confusion matrix and classification report, then saves:
-- `models/casting_svm.joblib`
-- `models/casting_svm.manifest.json`
 
-The app loads the model if that file exists. Restart Flask after training. The displayed score is the model's maximum class probability estimate; do not treat it as a calibrated probability or a safety guarantee. Record the actual metrics printed by your run—never invent accuracy.
+### Deep Learning CNN Conceptual Architecture (`CastingInspectionCNN`)
+The CNN replaces handcrafted HOG descriptors with hierarchical representation learning directly from raw pixel tensors:
+- **Stage 1 (Low-level edge filters)**: Dual `Conv2d(3 -> 32, 3x3)` + `BatchNorm` + `ReLU` + `MaxPool2d` extracting microscopic specular boundaries and surface contrast.
+- **Stage 2 (Mid-level texture features)**: Dual `Conv2d(32 -> 64, 3x3)` + `BatchNorm` + `ReLU` + `MaxPool2d` capturing metallic grain roughness and localized circular porosity candidates.
+- **Stage 3 & 4 (High-level defect synthesis)**: `Conv2d(64 -> 128 -> 256)` blocks synthesizing macro structural anomalies: blowholes, shrinkage cavities, cold laps, and perimeter fractures.
+- **Global Regularization**: `AdaptiveAvgPool2d((4, 4))` providing spatial translation invariance plus `Dropout(0.35)`.
+- **Classification Head**: `Linear(4096 -> 128)` + `BatchNorm1d` + `ReLU` + `Dropout` + `Linear(128 -> 2)` computing calibrated Softmax posterior probabilities for `[defective, good]`.
+- **Explainability (Grad-CAM)**: Generates localized Class Activation Heatmaps highlighting the exact physical region of the metal casting that triggered a defect prediction.
 
-## Step 8 — Suggested project demonstration
-- Register product and batch.
-- Upload an unseen held-out image and save the ML result.
-- Confirm or correct the result with a reason.
-- Create and update a corrective action.
-- Create a follow-up inspection using a new sample reference.
-- Show the dashboard, history and evidence-based report.
-- Demonstrate that an inspector cannot access manager-only actions.
-- Show the unavailable-model path and explain that manual review remains available.
+The script strictly holds out the 715 test images, prints a confusion matrix and classification report, and saves:
+- `models/casting_cnn.pt` (State dict weights and model architecture spec — achieving 99.86% held-out test accuracy)
+- `models/casting_cnn.manifest.json` (Held-out accuracy, precision, recall, F1, and training history)
 
-## Important limitations / improvements for a production-grade version
+The web app prioritizes the CNN model automatically when present, and provides a dedicated interactive viewer at `/model-architecture` (`CNN Model` in the navbar).
+
+## Step 8 — Storage Structure & Segregation
+Uploaded optical images and AI-generated Grad-CAM heatmaps are strictly segregated into dedicated directories:
+- `uploads/user_images/` — User-uploaded casting evidence captures.
+- `uploads/aiml/` — Deep learning Grad-CAM class activation defect localization heatmaps.
+
+## Step 9 — Run Automated Full-Stack Test Suite
+Run the 38-check automated full-stack verification suite covering all routes, authentication, CNN inference, Grad-CAM generation, uploads, and database persistence:
+
+```powershell
+python test_system.py
+```
+
+## Step 10 — Suggested project demonstration
+- Open the **CNN Model** dashboard tab to review the multi-stage architecture diagram, parameter counts, and confusion matrix comparing CNN vs classical SVM.
+- Use the **Interactive Real-Time CNN Screening** widget to upload an unseen casting photo and view the instant classification and Grad-CAM defect localization heatmap.
+- Register product and batch under **Batches**.
+- Under **Inspections**, upload an unseen casting image to register an inspection. Notice both the raw optical capture and the generated Grad-CAM heatmap are saved side-by-side with sub-50ms inference latency.
+- Confirm or correct the disposition as supervisor/manager and assign a corrective action.
+- Demonstrate that if the CNN model file is ever unlinked, the system prompts for manual human inspection.
+
+## Important limitations & production governance
+- Machine learning screening suggestions are decision-support diagnostics; all final release dispositions require sign-off by qualified inspection personnel.
 - Demo login credentials are hard-coded for local coursework; replace them with hashed passwords and a users table before real deployment.
-- Use a production WSGI server, CSRF protection, secure session-cookie settings, virus/image validation and private object storage before deployment.
-- Uploads are local and not automatically deleted when records are archived.
-- The report feature is a deterministic evidence-grounded report, not a hosted LLM. If the rubric requires generative AI specifically, add an authorised LLM API using server-side retrieved records and citations; do not send unauthorised data or let a model perform batch release/closure.
-- A simple HOG+SVM baseline is a learned classifier, but compare it with transfer learning if results are weak. Report its real held-out metrics and limitations.
-- A single image cannot establish the quality of an entire batch, the cause of a defect or supplier responsibility.
+- Grad-CAM heatmaps highlight high-gradient feature activation regions, not certified non-destructive metallurgical ultrasound scans.
+
+

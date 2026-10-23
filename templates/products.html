@@ -1,89 +1,101 @@
 {% extends "base.html" %}
-{% block title %}Products · QualityTrack{% endblock %}
+{% block title %}Product Specifications · QualityTrack{% endblock %}
 
 {% block content %}
-<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+<!-- Page Header -->
+<div class="page-header-row">
   <div>
-    <h1 class="h3 fw-bold mb-1">Product Specifications</h1>
-    <p class="text-muted mb-0">Define manufactured parts, materials, and associated quality standards.</p>
+    <h1 class="page-title">Product Specifications</h1>
+    <p class="page-subtitle">Configure manufactured part specifications, casting material standards, and linked lot batches.</p>
+  </div>
+  <div class="header-actions">
+    <span class="user-status-pill">
+      <span>Active Specs: <strong>{{ products|length }}</strong></span>
+    </span>
   </div>
 </div>
 
-<div class="row g-4">
-  <!-- Add Product Form -->
-  <div class="col-md-4">
-    <div class="card shadow-sm">
-      <div class="card-header">
-        <span class="d-flex align-items-center gap-2">
-          <i class="bi bi-plus-circle text-primary"></i>
-          Register Product
-        </span>
-      </div>
-      <div class="card-body">
-        <form method="post">
-          <div class="mb-3">
-            <label class="form-label">Product Name <span class="text-danger">*</span></label>
-            <input class="form-control" name="name" placeholder="e.g. Turbine Impeller Flange" required>
-          </div>
-
-          <div class="mb-4">
-            <label class="form-label">Category / Material Standard</label>
-            <input class="form-control" name="category" value="Metal casting" required>
-          </div>
-
-          <button type="submit" class="btn btn-primary w-100">
-            <i class="bi bi-box-seam me-1"></i> Create Product
-          </button>
-        </form>
-      </div>
+<div class="two-col-layout">
+  <!-- Left Column: Register Product -->
+  <div class="card-clean">
+    <div class="card-header-clean">
+      <h2 class="card-title-clean">Register Product Specification</h2>
+      <span style="font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono);">SPEC MGT</span>
     </div>
+    
+    <form method="post">
+      <div class="form-group-clean">
+        <label class="form-label-clean" for="productName">Product / Part Name <span style="color: var(--status-defect-text);">*</span></label>
+        <input class="form-input-clean" name="name" id="productName" placeholder="e.g. Turbine Impeller Flange" required>
+      </div>
+
+      <div class="form-group-clean" style="margin-bottom: 24px;">
+        <label class="form-label-clean" for="productCategory">Material Category / Standard <span style="color: var(--status-defect-text);">*</span></label>
+        <input class="form-input-clean" name="category" id="productCategory" value="Metal casting" placeholder="e.g. Cast Iron ASTM A48, Steel ASTM A216" required>
+      </div>
+
+      <button type="submit" class="form-btn-submit">
+        <i class="bi bi-shield-plus"></i> Register Product
+      </button>
+    </form>
   </div>
 
-  <!-- Product List Table -->
-  <div class="col-md-8">
-    <div class="card shadow-sm h-100">
-      <div class="card-header">
-        <span class="d-flex align-items-center gap-2">
-          <i class="bi bi-box-seam text-primary"></i>
-          Active Products Registry
-        </span>
-        <span class="badge text-bg-secondary">{{ products|length }} Products</span>
-      </div>
-      <div class="table-responsive">
-        <table class="table table-custom">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Product Name</th>
-              <th>Category</th>
-              <th>Active Batches</th>
-              <th>Registered Date</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for p in products %}
-            <tr>
-              <td class="fw-bold text-light">#{{ p.id }}</td>
-              <td class="fw-semibold text-light">{{ p.name }}</td>
-              <td><span class="badge text-bg-dark border border-secondary border-opacity-50">{{ p.category }}</span></td>
-              <td>
-                <span class="badge bg-primary bg-opacity-25 text-primary border border-primary border-opacity-25">
-                  {{ p.batch_count or 0 }} batches
-                </span>
-              </td>
-              <td class="small text-muted font-monospace">{{ p.created_at[:10] }}</td>
-            </tr>
-            {% else %}
-            <tr>
-              <td colspan="5" class="text-center text-muted py-5">
-                No products registered yet.
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+  <!-- Right Column: Product Registry -->
+  <div class="card-clean">
+    <div class="card-header-clean">
+      <div>
+        <h2 class="card-title-clean">Product Registry</h2>
+        <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 2px;">
+          {{ products|length }} active production part configurations
+        </div>
       </div>
     </div>
+
+    {% if products %}
+    <div style="overflow-x: auto;">
+      <table class="table-clean">
+        <thead>
+          <tr>
+            <th style="width: 12%;">SPEC ID</th>
+            <th style="width: 34%;">PART NAME</th>
+            <th style="width: 24%;">MATERIAL CATEGORY</th>
+            <th style="width: 15%;">ACTIVE BATCHES</th>
+            <th style="width: 15%;">REGISTERED</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in products %}
+          <tr>
+            <td style="color: var(--text-muted); font-family: var(--font-mono); font-weight: 600;">#{{ p.id }}</td>
+            <td>
+              <strong style="color: var(--text-primary); font-size: 0.88rem;">{{ p.name }}</strong>
+            </td>
+            <td style="color: var(--text-secondary);">
+              <span class="user-status-pill" style="font-size: 0.76rem; padding: 2px 8px;">
+                {{ p.category }}
+              </span>
+            </td>
+            <td>
+              <span style="font-family: var(--font-mono); font-weight: 600; color: var(--text-primary);">
+                {{ p.batch_count or 0 }}
+              </span>
+              <span style="font-size: 0.75rem; color: var(--text-muted);">lots</span>
+            </td>
+            <td style="color: var(--text-muted); font-size: 0.82rem; font-family: var(--font-mono);">
+              {{ p.created_at[:10] }}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state-box">
+      <i class="bi bi-gear empty-state-icon"></i>
+      <div class="empty-state-title">No product specifications registered</div>
+      <div class="empty-state-desc">Register your first part specification using the form on the left.</div>
+    </div>
+    {% endif %}
   </div>
 </div>
 {% endblock %}

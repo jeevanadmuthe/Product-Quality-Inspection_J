@@ -1,0 +1,726 @@
+# MASTER DEVELOPMENT PROMPT — PRODUCT QUALITY INSPECTION
+## Human-Centered UI Redesign, Full-Stack Audit, Bug Fixing and Production-Ready Improvements
+
+You are acting as a senior full-stack software engineer, product designer, UI/UX specialist, computer-vision engineer, accessibility reviewer, and QA automation engineer.
+
+Your task is to inspect, improve, debug, and refactor the existing **Product Quality Inspection** project. The current interface looks overly AI-generated and lacks the visual character of a carefully designed, professional software product.
+
+I want you to transform it into a polished, minimalist, human-designed industrial quality-inspection application with refined interactions, meaningful animations, excellent usability, and reliable functionality.
+
+**IMPORTANT: Do not stop after analyzing the repository or generating a plan. Actually inspect the source code, implement the improvements, run the available checks, fix the problems you find, and verify the resulting application.**
+
+---
+
+# PHASE 1 — UNDERSTAND THE EXISTING PROJECT
+
+Before changing anything, inspect the entire repository.
+
+1. Identify the existing frontend framework, language, styling system, component libraries, backend framework, database, APIs, authentication mechanism, AI models, computer-vision libraries, and deployment configuration.
+2. Inspect the directory structure, package manifests, dependency versions, environment configuration, README, entry points, routing, shared components, services, controllers, models, and API integrations.
+3. Trace the complete user journey through the application.
+4. Identify every existing feature and determine how its implementation works.
+5. Inspect the image-upload pipeline, image-processing workflow, defect detection logic, result generation, history management, reports, and other inspection-related features that actually exist.
+6. Check the frontend-to-backend communication and verify that API requests and responses match.
+7. Identify broken imports, missing dependencies, inconsistent types, unused components, duplicate logic, invalid routes, incorrect state handling, missing error handling, and configuration problems.
+8. Determine which parts are functional, partially functional, broken, mocked, or dependent on external services.
+
+Create a concise internal implementation checklist and then begin development.
+
+Do not assume the technology stack from the repository name. Read the actual files first.
+
+### Preserve the existing project
+
+- Keep the existing repository and its primary directory structure.
+- Preserve existing features, business logic, model integrations, routes, APIs, and data formats wherever possible.
+- Do not unnecessarily migrate to another framework.
+- Do not replace working functionality with static HTML, mock results, hardcoded dashboards, or decorative controls.
+- Do not remove existing functionality simply to make the interface easier to redesign.
+- Refactor individual modules when necessary, but maintain compatibility with the rest of the application.
+- Before modifying critical files, understand their dependencies and callers.
+
+---
+
+# PHASE 2 — ESTABLISH A DISTINCT HUMAN-DESIGNED VISUAL IDENTITY
+
+Redesign the application so that it feels like a real industrial software product created by an experienced product designer.
+
+The visual direction should be:
+
+- Minimalist and professional.
+- Industrial, technical, and trustworthy.
+- Clean, restrained, and visually balanced.
+- Easy to understand for manufacturing operators, quality inspectors, students, and technical users.
+- Modern without looking like a generic AI-generated SaaS template.
+- Visually distinctive without sacrificing functionality.
+
+## 2.1 Design direction
+
+Use the visual language of modern industrial inspection software, laboratory tools, engineering applications, and precision instruments.
+
+Prioritize:
+- Clear information hierarchy.
+- Excellent typography.
+- Intentional whitespace.
+- Consistent spacing.
+- Precise alignment.
+- Thin borders and restrained shadows.
+- Compact but readable data presentation.
+- Strong visual treatment of inspection evidence.
+- Useful empty, loading, success, and error states.
+
+Avoid making every section a separate floating card.
+
+Use cards only when they help group related information. Prefer structured layouts, aligned panels, compact data tables, subtle separators, and clear section headings.
+
+## 2.2 Color system
+
+Create a consistent color system using design tokens or the equivalent supported by the current stack.
+
+Suggested direction:
+
+- Primary background: warm off-white or very light neutral.
+- Main surfaces: white or subtle neutral shades.
+- Primary text: charcoal or deep graphite.
+- Secondary text: muted gray.
+- Primary accent: restrained industrial blue, deep teal, or another carefully selected technical color.
+- Success: muted green.
+- Warning: restrained amber.
+- Failure: muted red.
+- Borders: subtle neutral gray.
+
+Choose a coherent palette rather than applying every suggested color.
+
+Use color to communicate meaning. For example:
+- Green for an accepted inspection result.
+- Amber for an uncertain result requiring review.
+- Red for a confirmed failure.
+- Neutral colors for ordinary information.
+
+Do not rely on color alone to convey status.
+
+Avoid:
+- Excessive purple-to-blue gradients.
+- Neon accents.
+- Rainbow charts.
+- Glassmorphism everywhere.
+- Heavy glow effects.
+- Excessive colored shadows.
+- Unnecessary animated backgrounds.
+- A different accent color for every component.
+
+The final design should remain visually attractive even when animations are disabled.
+
+## 2.3 Typography
+
+Choose a clean, readable font appropriate for a technical application.
+
+Use the existing font if it is already suitable; otherwise, select a practical font such as Inter, Geist, or a comparable sans-serif typeface.
+
+Establish a consistent type scale for:
+- Page titles.
+- Section headings.
+- Body text.
+- Labels.
+- Metadata.
+- Numeric metrics.
+- Table headers.
+- Buttons and form fields.
+
+Avoid oversized hero typography inside the operational dashboard.
+
+Use tabular numerals for metrics where supported. Maintain comfortable line heights and readable contrast.
+
+## 2.4 Spacing, shapes, and layout
+
+- Establish a consistent spacing scale.
+- Use a small, coherent set of border-radius values.
+- Avoid rounding every element excessively.
+- Avoid giant pill-shaped buttons unless appropriate for a specific interaction.
+- Align content to a clear grid.
+- Keep forms compact and readable.
+- Use subtle separators instead of unnecessary containers.
+- Ensure important inspection information is visible without excessive scrolling.
+- Use consistent margins and content widths across pages.
+
+## 2.5 Avoid the generic AI-generated appearance
+
+Do not generate another stereotypical AI dashboard.
+
+Specifically avoid:
+- Four oversized statistic cards at the top of every page.
+- Random decorative graphs without meaningful data.
+- Excessive floating panels.
+- Large gradient hero sections inside operational screens.
+- Repeated sparkle icons and AI badges.
+- Unnecessary marketing copy.
+- Artificial percentages and fake activity feeds.
+- Excessive pill badges.
+- Repetitive rounded rectangles.
+- Unnecessary glass effects.
+- Animations applied to every element.
+- Huge empty spaces created solely to make the interface look premium.
+
+Every visual element must serve a user need.
+
+---
+
+# PHASE 3 — REDESIGN THE APPLICATION INTERFACE
+
+Inspect the actual existing routes and redesign all relevant screens, not just the home page.
+
+Adapt the following recommendations to the features already present in the repository. Do not invent unsupported capabilities.
+
+## 3.1 Main application shell
+
+Create a coherent application shell with:
+
+- A compact brand area.
+- A clear primary navigation.
+- A well-organized content area.
+- Context-appropriate page titles.
+- Consistent action placement.
+- Useful status indicators.
+- A responsive mobile navigation pattern.
+
+If the existing project has multiple pages, make their navigation and visual language consistent.
+
+Navigation should indicate the current page clearly.
+
+Do not add navigation links that lead to nonexistent pages.
+
+## 3.2 Dashboard or home screen
+
+Make the dashboard immediately useful.
+
+Prioritize:
+- A clear heading and short contextual description.
+- A prominent action to start a new inspection.
+- A concise summary of actual inspection activity.
+- Recent inspections, if inspection history exists.
+- Clear inspection status indicators.
+- Useful shortcuts to existing features.
+- Empty states when no inspection records exist.
+
+Use real data from the existing backend or local persistence mechanism.
+
+Calculate summary metrics from actual records. Do not invent inspection counts, defect rates, accuracy values, production totals, or model performance figures.
+
+If no data is available, show a clear empty state rather than fake statistics.
+
+## 3.3 Product inspection workflow
+
+Treat inspection as the central user journey.
+
+Improve the workflow to make it obvious what the user needs to do next.
+
+Where supported by the current implementation, provide:
+
+1. Product or inspection identification.
+2. Image selection, upload, or capture.
+3. Preview of the selected image.
+4. Validation of file type and size.
+5. Clear processing feedback.
+6. Inspection execution.
+7. Results with visual evidence.
+8. A clear next step, such as reviewing, saving, or exporting results.
+
+Do not force the user through unnecessary steps.
+
+Support drag-and-drop if compatible with the existing application, but retain a visible, accessible file-picker control.
+
+Display useful upload errors, including unsupported formats, oversized files, empty selections, and failed uploads.
+
+Prevent accidental duplicate submissions when an inspection is already running.
+
+If cancellation is supported or can be implemented safely, provide it for long-running operations.
+
+## 3.4 Inspection results and defect visualization
+
+Results must be the most information-rich and visually precise part of the application.
+
+Where supported by the existing detection pipeline, display:
+- The original product image.
+- Detected defects or regions of interest.
+- Bounding boxes, masks, or other actual model outputs.
+- Defect labels.
+- Confidence values.
+- Inspection status.
+- Relevant metadata.
+- Recommended next actions.
+
+Keep annotations aligned with the displayed image when the image is resized or the layout changes.
+
+Preserve aspect ratios. Do not distort product images.
+
+If the backend returns coordinates for detected defects, verify whether they are normalized or expressed in pixels and transform them correctly for display.
+
+Do not create fake defect boxes or pretend that a model detected defects when it did not.
+
+If a detection fails, show an understandable error and allow the user to retry when appropriate.
+
+Distinguish clearly between:
+- Passed inspection.
+- Failed inspection.
+- Inconclusive inspection.
+- Processing error.
+
+Do not equate an API error or missing model output with a product defect.
+
+Do not label a product as defective solely because confidence is low unless the existing inspection logic explicitly defines that behavior.
+
+## 3.5 Inspection history
+
+If history exists, make it practical to use.
+
+Include appropriate features such as:
+- Search.
+- Status filtering.
+- Date filtering.
+- Sorting.
+- Pagination or progressive loading for large datasets.
+- Inspection details.
+- Relevant actions on each record.
+
+Use a compact table on desktop where appropriate and a readable stacked layout on mobile.
+
+Show meaningful empty states when no records match the selected filters.
+
+Ensure that filtering and sorting use actual record values.
+
+Do not add nonfunctional export, delete, search, or filter controls.
+
+## 3.6 Reports and exports
+
+If reports or exports exist:
+- Preserve their functionality.
+- Make the actions easy to find.
+- Display export progress and failures.
+- Validate that the generated document contains the correct inspection data.
+- Ensure exported images and defect annotations are correct.
+- Prevent duplicate report generation when inappropriate.
+
+Only add new export formats if the existing architecture supports them and they provide real value.
+
+## 3.7 Forms and settings
+
+Audit every existing form and settings screen.
+
+Ensure:
+- Labels are clear.
+- Required fields are identified.
+- Validation messages are understandable.
+- Errors appear near the relevant fields.
+- Valid input is preserved when a recoverable error occurs.
+- Submit buttons communicate their state.
+- Disabled controls have a legitimate reason.
+- Settings persist correctly when persistence is expected.
+
+---
+
+# PHASE 4 — IMPLEMENT SUBTLE, HIGH-QUALITY ANIMATIONS
+
+Add animations that make the application feel responsive and thoughtfully engineered.
+
+Use the existing animation library if one is already installed and suitable. Otherwise, prefer lightweight CSS transitions or a compatible, minimal dependency.
+
+Do not introduce a large animation library for a few simple hover effects.
+
+## 4.1 Hover effects
+
+Add restrained hover states to:
+- Navigation items.
+- Buttons.
+- Interactive table rows.
+- Inspection history entries.
+- Image thumbnails.
+- Action menus.
+- Interactive result panels.
+
+Examples:
+- A subtle background transition on navigation items.
+- A small elevation change on genuinely clickable surfaces.
+- A slight icon movement when it communicates an action.
+- A smooth border-color change on focused or hovered controls.
+- A clear visual response when a button is pressed.
+
+Hover states must not suggest that a noninteractive element is clickable.
+
+## 4.2 Micro-interactions
+
+Add polished feedback for:
+- File selection.
+- Drag-and-drop.
+- Inspection submission.
+- Processing.
+- Successful completion.
+- Validation errors.
+- Saving records.
+- Opening dialogs.
+- Expanding result details.
+- Switching between relevant views.
+
+Animations should be short, consistent, and unobtrusive.
+
+Suggested timing:
+- Hover and focus transitions: approximately 120–200 ms.
+- Small UI transitions: approximately 160–240 ms.
+- Larger panel transitions: approximately 200–320 ms.
+
+These are guidelines, not mandatory values for every element.
+
+## 4.3 Page transitions and entrance animations
+
+Use subtle transitions where they improve comprehension.
+
+Avoid:
+- Long entrance sequences.
+- Every element animating independently.
+- Constant floating effects.
+- Excessive bounce animations.
+- Animations that delay access to information.
+- Large motion effects when changing tabs or filters.
+
+Respect the user's reduced-motion preference through `prefers-reduced-motion` or the framework's equivalent.
+
+Ensure animations do not cause layout shifts, visual flicker, or interaction delays.
+
+---
+
+# PHASE 5 — PERFORM A COMPLETE FUNCTIONALITY AND BUG AUDIT
+
+A visual redesign is not complete if existing features stop working.
+
+Inspect the entire application and investigate the following categories.
+
+## 5.1 Frontend bugs
+
+Check for:
+- Console errors and warnings.
+- Broken imports.
+- Missing components.
+- Incorrect routes.
+- Broken navigation.
+- Invalid event handlers.
+- React or framework rendering errors.
+- Incorrect state updates.
+- Stale state and stale closures.
+- Incorrect effect dependencies.
+- Memory leaks and unremoved event listeners.
+- Missing loading states.
+- Duplicate requests.
+- Race conditions.
+- Incorrect form validation.
+- Broken image previews.
+- Failed image rendering.
+- Responsive layout issues.
+- Incorrect conditional rendering.
+- Incorrect API response handling.
+- Unhandled promise rejections.
+
+Use framework-appropriate fixes rather than hiding errors with broad exception handling.
+
+## 5.2 Backend and API bugs
+
+If the repository contains a backend, audit:
+- API route correctness.
+- Request and response schemas.
+- HTTP status codes.
+- Input validation.
+- Error handling.
+- File-upload handling.
+- Request-size limits.
+- Image decoding and validation.
+- Database queries and persistence.
+- Missing or incorrect transaction handling.
+- Resource cleanup.
+- Authentication and authorization, if implemented.
+- Cross-origin configuration.
+- API timeouts.
+- Dependency compatibility.
+- Environment-variable validation.
+
+Verify that frontend expectations match actual backend response formats.
+
+Do not silently swallow backend errors or return fake success responses.
+
+Do not disable authentication or authorization to make the demo easier.
+
+## 5.3 AI and computer-vision pipeline
+
+Trace the complete inspection path from the user's uploaded image to the displayed result.
+
+Verify:
+- The intended model or inspection algorithm is actually called.
+- The input format matches the model's requirements.
+- Image color channels are handled correctly.
+- Image dimensions and preprocessing are correct.
+- Model outputs are interpreted correctly.
+- Confidence values are handled consistently.
+- Defect labels match the actual output classes.
+- Bounding-box coordinates are transformed correctly.
+- Missing model weights or configuration are reported clearly.
+- External AI-service failures are handled safely.
+- Timeouts and invalid responses do not crash the application.
+
+Do not replace the actual model with random outputs, fabricated detections, or hardcoded results.
+
+Do not change the inspection algorithm or thresholds merely to make the UI appear more successful.
+
+If the existing model is unreliable, document the limitation and improve error handling without making unsupported accuracy claims.
+
+## 5.4 Database and data-integrity checks
+
+Where a database or persistent storage exists, verify:
+- Records are saved correctly.
+- Data types and field mappings are consistent.
+- Inspection IDs remain unique.
+- Existing records remain accessible after reload.
+- Failed operations do not produce partial or inconsistent data.
+- Deletion, if supported, targets the correct record.
+- Updates affect only the intended record.
+- Multiple users or sessions do not accidentally share or overwrite private records.
+- Database errors are handled without corrupting state.
+
+Preserve existing data and avoid destructive schema changes unless absolutely necessary and properly migrated.
+
+## 5.5 Security and configuration
+
+Review:
+- Hardcoded secrets.
+- Exposed API keys.
+- Unsafe file handling.
+- Unvalidated input.
+- Unsafe rendering of user-provided content.
+- Unnecessary CORS permissions.
+- Dependency vulnerabilities where tooling permits.
+- Insecure debug configuration.
+- Sensitive information in logs.
+- Unsafe access to uploaded files.
+
+Never commit secrets to source control.
+
+Do not print credentials or environment-variable values in the UI or logs.
+
+If a security issue requires configuration changes, document the required environment variables and setup steps.
+
+---
+
+# PHASE 6 — RESPONSIVE DESIGN AND ACCESSIBILITY
+
+Test the application at these approximate viewport widths:
+
+- Mobile: 360–390 px.
+- Tablet: 768 px.
+- Laptop: 1366 px.
+- Desktop: 1920 px.
+
+Check for:
+- Horizontal overflow.
+- Clipped buttons.
+- Broken navigation.
+- Overlapping panels.
+- Unreadable tables.
+- Distorted images.
+- Poorly sized dialogs.
+- Forms that extend beyond the viewport.
+- Inaccessible menus.
+- Excessive whitespace.
+- Content hidden behind fixed elements.
+
+Implement responsive layouts appropriate to the current framework.
+
+Accessibility requirements:
+- Use semantic HTML.
+- Provide accessible names for icon-only buttons.
+- Associate labels with inputs.
+- Ensure keyboard navigation works.
+- Show visible keyboard focus.
+- Maintain sufficient color contrast.
+- Use appropriate ARIA attributes where necessary.
+- Announce important status updates to assistive technologies.
+- Do not rely exclusively on color to communicate errors or inspection status.
+- Support reduced motion.
+
+Do not add ARIA attributes unnecessarily where semantic HTML already provides the correct behavior.
+
+---
+
+# PHASE 7 — CODE QUALITY AND MAINTAINABILITY
+
+Improve the existing codebase without unnecessary rewrites.
+
+Requirements:
+- Reuse components where this improves consistency.
+- Keep components focused on clear responsibilities.
+- Extract repeated styles and design tokens.
+- Remove genuinely unused code after checking references.
+- Avoid duplicated business logic.
+- Avoid unnecessary dependencies.
+- Maintain readable naming conventions.
+- Preserve framework conventions.
+- Add appropriate type safety where supported.
+- Keep API logic separate from presentation where the architecture calls for it.
+- Avoid giant components containing the entire application.
+- Avoid unnecessary abstractions for simple features.
+- Add comments only where they clarify non-obvious logic.
+- Keep formatting consistent with the existing project.
+
+Do not suppress compiler errors, lint errors, or test failures merely to obtain a successful build.
+
+Do not use `any`, broad casts, or broad exception handlers as shortcuts when a proper fix is practical.
+
+---
+
+# PHASE 8 — TESTING AND VERIFICATION
+
+After implementing the redesign, run the actual checks supported by the repository.
+
+Inspect package scripts, test configuration, backend test commands, and available development tools before choosing commands.
+
+## 8.1 Static checks
+
+Run applicable checks, such as:
+- Dependency and build validation.
+- Linting.
+- Type checking.
+- Production build.
+- Backend syntax checks.
+- Backend unit tests.
+- Existing integration tests.
+
+Do not claim that a check passed unless it actually completed successfully.
+
+## 8.2 Functional testing
+
+Test the following workflows where the corresponding features exist:
+
+1. Application starts successfully.
+2. Main pages load.
+3. Navigation works.
+4. Product image can be selected or uploaded.
+5. Invalid files are rejected with useful messages.
+6. A valid image reaches the actual inspection pipeline.
+7. Processing and failure states are handled correctly.
+8. Inspection results display accurately.
+9. History records are saved and retrieved.
+10. Search, filters, and sorting work.
+11. Report generation works.
+12. Relevant settings persist.
+13. Refreshing the page does not unexpectedly destroy persistent records.
+14. API failures are displayed gracefully.
+15. The application remains usable on mobile and desktop.
+
+Skip tests for features that do not exist rather than fabricating them.
+
+## 8.3 Browser verification
+
+If browser automation or a browser preview is available:
+- Open the running application.
+- Check the primary user journeys.
+- Inspect console errors.
+- Inspect network failures.
+- Verify the image-upload flow.
+- Test buttons, forms, dialogs, menus, and navigation.
+- Check responsive behavior.
+- Verify that hover and focus states render correctly.
+
+If browser automation is unavailable, run the strongest available checks and explicitly state what could not be verified.
+
+## 8.4 Regression testing
+
+Ensure that the redesign does not break:
+- Existing API contracts.
+- Data persistence.
+- AI inference.
+- Image processing.
+- Authentication.
+- Navigation.
+- Existing features.
+- Deployment configuration.
+
+Fix any regression caused by your changes before declaring the task complete.
+
+---
+
+# PHASE 9 — IMPLEMENTATION ORDER
+
+Follow this order to reduce unnecessary rework.
+
+1. Inspect the repository and identify the actual architecture.
+2. Establish the baseline by running existing tests and builds where feasible.
+3. Identify current errors and prioritize critical failures.
+4. Define the visual design tokens and reusable styling rules.
+5. Redesign the application shell and navigation.
+6. Improve the primary inspection workflow.
+7. Redesign the results and history screens that exist.
+8. Add responsive behavior and accessibility improvements.
+9. Add subtle hover effects and meaningful micro-interactions.
+10. Fix frontend, backend, persistence, and model-integration bugs.
+11. Run tests and production builds.
+12. Fix regressions and repeat failed checks.
+13. Update documentation and setup instructions.
+14. Produce a final implementation report.
+
+Do not spend the entire task perfecting one page while leaving other screens broken or inconsistent.
+
+Prioritize correctness and the primary user workflow first, then visual refinement.
+
+---
+
+# PHASE 10 — ACCEPTANCE CRITERIA
+
+The task is complete only when the following requirements have been addressed:
+
+### Design
+- The UI has a consistent, minimalist, human-centered visual identity.
+- It no longer relies on generic AI-dashboard styling.
+- Typography, spacing, colors, borders, and component states are consistent.
+- Animations are subtle and purposeful.
+- Hover effects work only on appropriate interactive elements.
+- The layout is responsive.
+
+### Functionality
+- Existing features remain available.
+- Main user journeys work end to end.
+- Inspection uses the real available model or algorithm.
+- Results reflect actual backend output.
+- Upload validation and error handling work.
+- Existing persistence and APIs remain compatible.
+
+### Reliability
+- Critical discovered bugs are fixed.
+- No new errors are introduced by the redesign.
+- Builds, tests, and static checks are run where available.
+- Failed checks are investigated and reported honestly.
+- No fake results or fake success states are introduced.
+
+### Maintainability
+- Code remains understandable.
+- Unnecessary dependencies and duplication are avoided.
+- Setup and configuration requirements are documented.
+- Existing project structure is preserved as much as practical.
+
+---
+
+# PHASE 11 — FINAL REPORT
+
+When implementation is complete, provide a concise but detailed report containing:
+
+1. **UI changes:** Pages, layouts, typography, colors, components, animations, and responsive improvements.
+2. **Bugs discovered:** Each confirmed issue, its cause, and its fix.
+3. **Backend and AI changes:** Any actual modifications to APIs, model integration, image processing, database logic, or configuration.
+4. **Files changed:** The important files and their responsibilities.
+5. **Testing performed:** Exact checks and tests run, including their actual results.
+6. **Remaining issues:** Anything unresolved, including external API, model-weight, database, or configuration dependencies.
+7. **How to run:** The verified installation and startup commands.
+8. **Limitations:** Features that could not be tested or claims that could not be verified.
+
+Distinguish between confirmed bugs, potential issues, and recommendations.
+
+Do not claim that the project is production-ready merely because the UI looks polished.
+
+Do not claim that tests passed if they were not executed.
+
+Do not stop at a proposed plan, mockup, screenshot, or list of recommendations.
+
+**Start by inspecting the existing repository, then implement the complete redesign and bug fixes directly in the project. Preserve working functionality, verify your changes, and deliver a stable, polished Product Quality Inspection application.**

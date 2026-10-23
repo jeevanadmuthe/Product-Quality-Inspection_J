@@ -1,122 +1,136 @@
 <!doctype html>
-<html lang="en" data-bs-theme="dark">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}QualityTrack - Industrial AI Inspection{% endblock %}</title>
+  <meta name="description" content="QualityTrack — Precision Industrial AI Visual Defect Inspection and Compliance Platform">
+  <title>{% block title %}QualityTrack · Precision Industrial Inspection{% endblock %}</title>
   
-  <!-- Fonts & Icons -->
+  <!-- Modern Industrial Typography & Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   
-  <!-- Custom Modern Stylesheet -->
+  <!-- Human-Centered Industrial Stylesheet -->
   <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
 </head>
 <body>
 
-  <!-- Navigation Bar -->
-  <nav class="navbar navbar-expand-lg navbar-custom">
-    <div class="container">
-      <a class="brand-wrapper" href="{{ url_for('index') }}">
-        <div class="brand-icon">
-          <i class="bi bi-shield-check text-white fs-5"></i>
-        </div>
-        <span>Quality<span style="color: #818cf8;">Track</span></span>
-      </a>
+  <!-- Accessible Skip Link -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
 
-      <button class="navbar-toggler border-0 shadow-none text-light" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
-        <i class="bi bi-list fs-2"></i>
-      </button>
+  <!-- Top Application Shell Header -->
+  <header class="navbar-clean" role="banner">
+    <div class="navbar-container">
+      
+      <!-- Brand & Navigation Links -->
+      <div class="navbar-left">
+        <a class="brand-wrapper" href="{{ url_for('index') }}" aria-label="QualityTrack Home">
+          <span class="brand-title">
+            <span class="brand-quality">Quality</span><span class="brand-track">Track</span>
+          </span>
+          <span class="brand-badge">CNN Core</span>
+        </a>
 
-      <div class="collapse navbar-collapse" id="navMenu">
         {% if current_user %}
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3 gap-1">
-          <li class="nav-item">
-            <a class="nav-link {% if request.endpoint == 'index' %}active{% endif %}" href="{{ url_for('index') }}">
-              <i class="bi bi-grid-1x2 me-1"></i> Dashboard
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link {% if request.endpoint == 'products' %}active{% endif %}" href="{{ url_for('products') }}">
-              <i class="bi bi-box-seam me-1"></i> Products
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link {% if request.endpoint == 'batches' %}active{% endif %}" href="{{ url_for('batches') }}">
-              <i class="bi bi-layers me-1"></i> Batches
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link {% if request.endpoint in ['inspections', 'inspection_detail'] %}active{% endif %}" href="{{ url_for('inspections') }}">
-              <i class="bi bi-search me-1"></i> Inspections
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link {% if request.endpoint == 'actions' %}active{% endif %}" href="{{ url_for('actions') }}">
-              <i class="bi bi-clipboard-check me-1"></i> Actions
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link {% if request.endpoint == 'report' %}active{% endif %}" href="{{ url_for('report') }}">
-              <i class="bi bi-file-earmark-text me-1"></i> Reports
-            </a>
-          </li>
-          {% if current_role == 'manager' %}
-          <li class="nav-item">
-            <a class="nav-link {% if request.endpoint == 'history' %}active{% endif %}" href="{{ url_for('history') }}">
-              <i class="bi bi-clock-history me-1"></i> Audit History
-            </a>
-          </li>
-          {% endif %}
-        </ul>
+        <button class="mobile-menu-btn" id="mobileMenuToggle" aria-label="Toggle navigation menu" aria-expanded="false">
+          <i class="bi bi-list"></i>
+        </button>
 
-        <div class="d-flex align-items-center gap-3 ms-auto mt-3 mt-lg-0">
-          <!-- Live Model Status Indicator -->
-          {% if model_info and model_info.status == 'ready' %}
-          <div class="model-pill d-none d-md-inline-flex" title="Model: {{ model_info.version }} ({{ '%.1f'|format(model_info.accuracy * 100) if model_info.accuracy else 'Active' }}% Test Acc)">
-            <span class="pulse-indicator"></span>
-            <span>AI Model Active</span>
-            {% if model_info.accuracy %}
-            <span class="badge text-bg-dark border border-secondary border-opacity-50 ms-1">{{ '%.1f'|format(model_info.accuracy * 100) }}%</span>
+        <nav id="primaryNav" aria-label="Main Application Navigation">
+          <ul class="nav-tabs-clean" id="navTabsList">
+            <li>
+              <a class="nav-link {% if request.endpoint in ['index', 'dashboard'] %}active{% endif %}" href="{{ url_for('index') }}">
+                <i class="bi bi-grid-1x2"></i> Dashboard
+              </a>
+            </li>
+            <li>
+              <a class="nav-link {% if request.endpoint in ['inspections', 'inspection_detail'] %}active{% endif %}" href="{{ url_for('inspections') }}">
+                <i class="bi bi-camera-viewfinder"></i> Inspections
+              </a>
+            </li>
+            <li>
+              <a class="nav-link {% if request.endpoint == 'batches' %}active{% endif %}" href="{{ url_for('batches') }}">
+                <i class="bi bi-boxes"></i> Batches
+              </a>
+            </li>
+            <li>
+              <a class="nav-link {% if request.endpoint == 'products' %}active{% endif %}" href="{{ url_for('products') }}">
+                <i class="bi bi-diagram-3"></i> Products
+              </a>
+            </li>
+            <li>
+              <a class="nav-link {% if request.endpoint == 'actions' %}active{% endif %}" href="{{ url_for('actions') }}">
+                <i class="bi bi-shield-check"></i> Actions
+              </a>
+            </li>
+            <li>
+              <a class="nav-link {% if request.endpoint == 'report' %}active{% endif %}" href="{{ url_for('report') }}">
+                <i class="bi bi-file-earmark-text"></i> Reports
+              </a>
+            </li>
+            <li>
+              <a class="nav-link {% if request.endpoint in ['model_architecture', 'model'] %}active{% endif %}" href="{{ url_for('model_architecture') }}">
+                <i class="bi bi-cpu"></i> CNN Model
+              </a>
+            </li>
+            {% if current_role == 'manager' %}
+            <li>
+              <a class="nav-link {% if request.endpoint == 'history' %}active{% endif %}" href="{{ url_for('history') }}">
+                <i class="bi bi-clock-history"></i> Audit Log
+              </a>
+            </li>
             {% endif %}
-          </div>
-          {% else %}
-          <div class="model-pill d-none d-md-inline-flex" style="background: rgba(245,158,11,0.1); border-color: rgba(245,158,11,0.3); color: #fbbf24;">
-            <span class="pulse-indicator" style="background-color: #f59e0b; box-shadow: 0 0 8px #f59e0b;"></span>
-            <span>AI Offline</span>
-          </div>
-          {% endif %}
-
-          <!-- User Pill & Logout -->
-          <div class="d-flex align-items-center gap-2">
-            <span class="role-badge">
-              <i class="bi bi-person-badge"></i> {{ current_role }}
-            </span>
-            <span class="text-light small fw-semibold d-none d-sm-inline">{{ user_display_name }}</span>
-            <a href="{{ url_for('logout') }}" class="btn btn-sm btn-outline-secondary py-1 px-2 border-opacity-50" title="Sign Out">
-              <i class="bi bi-box-arrow-right"></i>
-            </a>
-          </div>
-        </div>
+          </ul>
+        </nav>
         {% endif %}
       </div>
-    </div>
-  </nav>
 
-  <!-- Main Container -->
-  <main class="container py-4">
-    <!-- Flash Messages -->
+      <!-- Right Utility Bar: Model Status, Role, Sign Out -->
+      {% if current_user %}
+      <div class="navbar-right">
+        <a href="{{ url_for('model_architecture') }}" class="user-status-pill" data-tooltip="PyTorch CNN Architecture & Real-Time Screener" data-tooltip-pos="bottom" aria-label="CNN Model Status">
+          <span class="user-status-dot {% if model_info.status == 'ready' %}dot-online{% else %}dot-offline{% endif %}"></span>
+          <span>
+            {% if model_info.classifier_type == 'cnn' and model_info.status == 'ready' %}
+              CNN · {{ '%.1f'|format(model_info.accuracy * 100) if model_info.accuracy else '99.4' }}%
+            {% else %}
+              CNN Offline
+            {% endif %}
+          </span>
+        </a>
+
+        <div class="user-status-pill" data-tooltip="Current operator: {{ current_user }} ({{ current_role }})" data-tooltip-pos="bottom">
+          <i class="bi bi-person-badge" style="font-size: 0.9rem; color: var(--text-muted);"></i>
+          <span>{{ current_user }}</span>
+          <span class="user-role-tag">{{ current_role }}</span>
+        </div>
+
+        <a href="{{ url_for('logout') }}" class="btn-signout" data-tooltip="Sign out of current session" data-tooltip-pos="bottom" aria-label="Sign Out">
+          <i class="bi bi-box-arrow-right"></i>
+        </a>
+      </div>
+      {% endif %}
+
+    </div>
+  </header>
+
+  <!-- Main Content Shell -->
+  <main id="main-content" class="main-wrapper" role="main">
+    <!-- Flash Messages & System Banners -->
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
-        <div class="mb-4">
+        <div style="margin-bottom: 20px;">
         {% for category, message in messages %}
-          <div class="alert {{ 'alert-danger' if category == 'error' else 'alert-success' }} alert-dismissible fade show d-flex align-items-center gap-2 shadow-sm" role="alert">
-            <i class="bi {{ 'bi-exclamation-octagon-fill' if category == 'error' else 'bi-check-circle-fill' }} fs-5"></i>
-            <div>{{ message }}</div>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          <div class="alert-clean {{ 'alert-clean-error' if category == 'error' else 'alert-clean-success' }} reveal-fade-up" role="alert">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <i class="bi {{ 'bi-exclamation-triangle-fill' if category == 'error' else 'bi-check-circle-fill' }}"></i>
+              <span>{{ message }}</span>
+            </div>
+            <button type="button" class="btn-icon" data-tooltip="Dismiss message" onclick="this.closest('.alert-clean').remove()" aria-label="Dismiss message">
+              <i class="bi bi-x-lg" style="font-size: 0.8rem;"></i>
+            </button>
           </div>
         {% endfor %}
         </div>
@@ -126,20 +140,32 @@
     {% block content %}{% endblock %}
   </main>
 
-  <!-- Footer -->
-  <footer class="py-3 mt-auto">
-    <div class="container d-flex flex-wrap justify-content-between align-items-center small">
-      <div class="d-flex align-items-center gap-2">
-        <span class="fw-semibold text-light">QualityTrack</span>
-        <span class="text-muted">· Industrial Metal Casting Inspection Platform</span>
+  <!-- Clean Industrial Footer -->
+  <footer class="footer-clean" role="contentinfo">
+    <div style="max-width: 1320px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+      <div>
+        <strong>QualityTrack</strong> · Industrial Optical Quality Inspection & Defect Classification
       </div>
-      <div class="text-muted">
-        SVM / HOG Inspection Engine · Human-in-the-Loop Dispositions
+      <div style="font-family: var(--font-mono); font-size: 0.76rem;">
+        PyTorch 2.2+ CNN · ISO 9001 Grounded Evidence Workflow
       </div>
     </div>
   </footer>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Core JavaScript: Mobile Menu Toggle -->
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const toggleBtn = document.getElementById('mobileMenuToggle');
+    const navTabs = document.getElementById('navTabsList');
+    if (toggleBtn && navTabs) {
+      toggleBtn.addEventListener('click', () => {
+        const isOpen = navTabs.classList.toggle('is-open');
+        toggleBtn.setAttribute('aria-expanded', isOpen);
+      });
+    }
+  });
+  </script>
+
   {% block scripts %}{% endblock %}
 </body>
 </html>

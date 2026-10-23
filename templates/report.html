@@ -2,158 +2,169 @@
 {% block title %}Quality Reports · QualityTrack{% endblock %}
 
 {% block content %}
-<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+<!-- Page Header -->
+<div class="page-header-row">
   <div>
-    <h1 class="h3 fw-bold mb-1">Evidence-Grounded Quality Report</h1>
-    <p class="text-muted mb-0">Deterministic reports synthesized strictly from database inspection records and corrective action audit trails.</p>
+    <h1 class="page-title">Evidence-Grounded Quality Report</h1>
+    <p class="page-subtitle">Deterministic quality synthesis generated strictly from verified database records and corrective action logs.</p>
+  </div>
+  <div class="header-actions">
+    {% if generated %}
+    <button class="btn-custom-outline" onclick="copyReport()" id="copyBtn" data-tooltip="Copy report text to clipboard">
+      <i class="bi bi-clipboard"></i> Copy Text
+    </button>
+    <button class="btn-custom-primary" onclick="window.print()" data-tooltip="Print or export compliance audit PDF">
+      <i class="bi bi-printer"></i> Print / PDF
+    </button>
+    {% endif %}
   </div>
 </div>
 
-<!-- Filter Toolbar -->
-<div class="card shadow-sm mb-4">
-  <div class="card-body">
-    <form method="get" class="row g-3 align-items-center">
-      <div class="col-md-5">
-        <label class="form-label small mb-1">Target Production Batch</label>
-        <select class="form-select" name="batch_code">
-          <option value="">All Production Batches</option>
-          {% for b in batches %}
-          <option value="{{ b.batch_code }}" {% if selected==b.batch_code %}selected{% endif %}>{{ b.batch_code }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div class="col-md-3 d-flex align-items-end">
-        <button class="btn btn-outline-primary w-100">
-          <i class="bi bi-funnel me-1"></i> Filter Scope
-        </button>
-      </div>
-    </form>
-  </div>
+<!-- Scope Filter Bar -->
+<div class="card-clean" style="padding: 16px 20px; margin-bottom: 20px;">
+  <form method="get" style="display: flex; gap: 14px; align-items: flex-end; flex-wrap: wrap;">
+    <div style="flex: 1; min-width: 240px;">
+      <label class="form-label-clean" for="batchScopeSelect" style="margin-bottom: 4px;">Target Production Lot Scope</label>
+      <select class="form-select-clean" name="batch_code" id="batchScopeSelect">
+        <option value="">All Production Batches (Full Facility Scope)</option>
+        {% for b in batches %}
+        <option value="{{ b.batch_code }}" {% if selected==b.batch_code %}selected{% endif %}>
+          Lot {{ b.batch_code }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <button type="submit" class="btn-custom-outline" style="padding: 9px 18px;">
+        <i class="bi bi-funnel"></i> Apply Scope
+      </button>
+    </div>
+  </form>
 </div>
 
-<!-- Metric Overview Cards -->
-<div class="row g-3 mb-4">
-  <div class="col-6 col-lg-3">
-    <div class="card stat-card stat-info h-100">
-      <div class="stat-label">Total Inspections</div>
-      <div class="stat-value">{{ summary.inspections }}</div>
-    </div>
+<!-- Key Metric Overview Cards -->
+<div class="stats-grid" style="margin-bottom: 20px;">
+  <div class="stat-card-clean">
+    <div class="stat-label-clean">TOTAL INSPECTIONS</div>
+    <div class="stat-value-clean">{{ summary.inspections }}</div>
+    <div class="stat-subtext-clean">In current evaluation scope</div>
   </div>
-  <div class="col-6 col-lg-3">
-    <div class="card stat-card stat-warning h-100">
-      <div class="stat-label">Pending Reviews</div>
-      <div class="stat-value text-warning">{{ summary.pending }}</div>
-    </div>
+
+  <div class="stat-card-clean">
+    <div class="stat-label-clean">PENDING REVIEWS</div>
+    <div class="stat-value-clean" style="color: var(--status-review-text);">{{ summary.pending }}</div>
+    <div class="stat-subtext-clean">Awaiting inspector verification</div>
   </div>
-  <div class="col-6 col-lg-3">
-    <div class="card stat-card stat-danger h-100">
-      <div class="stat-label">Confirmed Defects</div>
-      <div class="stat-value text-danger">{{ summary.confirmed_defects }}</div>
-    </div>
+
+  <div class="stat-card-clean">
+    <div class="stat-label-clean">CONFIRMED DEFECTS</div>
+    <div class="stat-value-clean" style="color: var(--status-defect-dot);">{{ summary.confirmed_defects }}</div>
+    <div class="stat-subtext-clean">Segregated non-conforming parts</div>
   </div>
-  <div class="col-6 col-lg-3">
-    <div class="card stat-card stat-success h-100">
-      <div class="stat-label">Open Actions</div>
-      <div class="stat-value text-primary">{{ summary.open_actions }}</div>
-    </div>
+
+  <div class="stat-card-clean">
+    <div class="stat-label-clean">ACTIVE CAPA ACTIONS</div>
+    <div class="stat-value-clean" style="color: var(--accent-primary);">{{ summary.open_actions }}</div>
+    <div class="stat-subtext-clean">Open mitigation work orders</div>
   </div>
 </div>
 
 <!-- Report Generator Trigger -->
-<div class="mb-4">
+<div style="margin-bottom: 20px;">
   <form method="post">
     <input type="hidden" name="batch_code" value="{{ selected }}">
-    <button type="submit" class="btn btn-primary">
-      <i class="bi bi-file-earmark-check me-1"></i> Generate Grounded Quality Audit Summary
+    <button type="submit" class="form-btn-submit" style="width: auto; padding: 11px 24px; display: inline-flex;">
+      <i class="bi bi-file-earmark-text"></i> Synthesize Quality Compliance Audit Document
     </button>
   </form>
 </div>
 
-<!-- Generated Report Output Box -->
+<!-- Synthesized Report Output Box -->
 {% if generated %}
-<div class="card shadow-sm mb-4">
-  <div class="card-header">
-    <span class="d-flex align-items-center gap-2">
-      <i class="bi bi-terminal-fill text-info"></i>
-      Synthesized Quality & Compliance Document
-    </span>
-    <div class="d-flex gap-2">
-      <button class="btn btn-sm btn-outline-secondary" onclick="copyReport()">
-        <i class="bi bi-clipboard me-1"></i> Copy Text
-      </button>
-      <button class="btn btn-sm btn-outline-primary" onclick="window.print()">
-        <i class="bi bi-printer me-1"></i> Print / PDF
-      </button>
+<div class="card-clean" style="margin-bottom: 24px;">
+  <div class="card-header-clean">
+    <div>
+      <h2 class="card-title-clean">Synthesized Quality & Compliance Document</h2>
+      <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 2px;">
+        Scope: <strong>{{ selected or 'All Production Batches' }}</strong> · Generated by <strong>{{ session.get('user') }}</strong>
+      </div>
     </div>
   </div>
-  <div class="card-body">
-    <pre class="report-text" id="reportContent">{{ generated }}</pre>
-  </div>
+  <pre id="reportContent" style="background: var(--bg-hover); border: 1px solid var(--border-hairline); border-radius: var(--radius-sm); padding: 20px; font-family: var(--font-mono); font-size: 0.84rem; line-height: 1.6; color: var(--text-primary); white-space: pre-wrap; margin: 0; overflow-x: auto;">{{ generated }}</pre>
 </div>
 {% endif %}
 
-<!-- Underlying Traceable Inspection Records -->
-<div class="card shadow-sm">
-  <div class="card-header">
-    <span class="d-flex align-items-center gap-2">
-      <i class="bi bi-database-check text-primary"></i>
-      Underlying Evidence Base ({{ inspections|length }} Records)
-    </span>
+<!-- Traceable Inspection Evidence Records -->
+<div class="card-clean">
+  <div class="card-header-clean">
+    <h2 class="card-title-clean">Underlying Traceable Evidence ({{ inspections|length }} Records)</h2>
   </div>
-  <div class="table-responsive">
-    <table class="table table-custom">
+
+  {% if inspections %}
+  <div style="overflow-x: auto;">
+    <table class="table-clean">
       <thead>
         <tr>
-          <th>Inspection ID</th>
-          <th>Batch Code</th>
-          <th>Sample Ref</th>
-          <th>Machine Vision</th>
-          <th>Human Result</th>
-          <th>Review Status</th>
+          <th style="width: 12%;">RECORD ID</th>
+          <th style="width: 18%;">BATCH LOT</th>
+          <th style="width: 22%;">SAMPLE REF</th>
+          <th style="width: 18%;">CNN SCREENING</th>
+          <th style="width: 18%;">HUMAN DISPOSITION</th>
+          <th style="width: 12%; text-align: right;">ACTION</th>
         </tr>
       </thead>
       <tbody>
         {% for i in inspections %}
         <tr>
-          <td>
-            <a href="{{ url_for('inspection_detail', inspection_id=i.id) }}" class="fw-bold text-primary text-decoration-none font-monospace">
-              #{{ i.id }}
-            </a>
+          <td style="color: var(--text-muted); font-family: var(--font-mono); font-weight: 600;">
+            #{{ i.id }}
           </td>
-          <td><span class="badge text-bg-dark border border-secondary border-opacity-50 font-monospace">{{ i.batch_code }}</span></td>
-          <td class="font-monospace text-light">{{ i.sample_ref }}</td>
+          <td>
+            <strong style="color: var(--text-primary); font-family: var(--font-mono);">{{ i.batch_code }}</strong>
+          </td>
+          <td style="color: var(--text-secondary);">
+            {{ i.sample_ref }}
+          </td>
           <td>
             {% if i.ml_prediction and i.ml_prediction|lower == 'good' %}
-              <span class="badge-status badge-good">Good</span>
+              <span class="pill-status pill-good">Good</span>
             {% elif i.ml_prediction and i.ml_prediction|lower == 'defective' %}
-              <span class="badge-status badge-defective">Defective</span>
+              <span class="pill-status pill-defective">Defective</span>
             {% else %}
-              <span class="badge-status badge-neutral">Unavailable</span>
+              <span class="pill-status pill-review">Pending</span>
+            {% endif %}
+            {% if i.ml_score is not none %}
+              <span style="font-family: var(--font-mono); font-size: 0.74rem; color: var(--text-muted);">
+                {{ '%.1f'|format(i.ml_score * 100) }}%
+              </span>
             {% endif %}
           </td>
           <td>
-            {% if i.human_result and i.human_result|lower == 'good' %}
-              <span class="badge-status badge-good">Good</span>
+            {% if i.human_result and i.human_result|lower in ['good', 'passed'] %}
+              <span class="pill-status pill-good">Passed</span>
             {% elif i.human_result and i.human_result|lower == 'defective' %}
-              <span class="badge-status badge-defective">Defective</span>
+              <span class="pill-status pill-defective">Defective</span>
             {% else %}
-              <span class="badge-status badge-neutral">{{ i.human_result }}</span>
+              <span class="pill-status pill-pending">{{ i.human_result or 'Pending' }}</span>
             {% endif %}
           </td>
-          <td>
-            <span class="badge text-bg-dark border border-secondary border-opacity-50">{{ i.status }}</span>
-          </td>
-        </tr>
-        {% else %}
-        <tr>
-          <td colspan="6" class="text-center text-muted py-5">
-            No matching inspections found for selected scope.
+          <td style="text-align: right;">
+            <a href="{{ url_for('inspection_detail', inspection_id=i.id) }}" class="table-link">
+              View →
+            </a>
           </td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
+  {% else %}
+  <div class="empty-state-box">
+    <i class="bi bi-file-earmark-x empty-state-icon"></i>
+    <div class="empty-state-title">No inspection records match this batch scope</div>
+    <div class="empty-state-desc">Select a different production batch or remove the scope filter to evaluate all records.</div>
+  </div>
+  {% endif %}
 </div>
 {% endblock %}
 
@@ -162,7 +173,11 @@
 function copyReport() {
   const content = document.getElementById('reportContent').innerText;
   navigator.clipboard.writeText(content).then(() => {
-    alert('Quality Audit Report copied to clipboard!');
+    const btn = document.getElementById('copyBtn');
+    btn.innerHTML = '<i class="bi bi-check-lg"></i> Copied!';
+    setTimeout(() => {
+      btn.innerHTML = '<i class="bi bi-clipboard"></i> Copy Text';
+    }, 2000);
   });
 }
 </script>

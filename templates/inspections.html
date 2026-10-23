@@ -1,279 +1,401 @@
 {% extends "base.html" %}
-{% block title %}Inspections · QualityTrack{% endblock %}
+{% block title %}Visual Product Inspections · QualityTrack{% endblock %}
 
 {% block content %}
-<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+<!-- Page Header -->
+<div class="page-header-row">
   <div>
-    <h1 class="h3 fw-bold mb-1">Visual Product Inspections</h1>
-    <p class="text-muted mb-0">Record sample inspections, run machine vision defect screening, and manage human reviews.</p>
+    <h1 class="page-title">Visual Product Inspections</h1>
+    <p class="page-subtitle">Real-time deep CNN optical inspection, Grad-CAM defect localization, and quality review.</p>
+  </div>
+  <div class="header-actions">
+    <span class="user-status-pill" title="CNN Model Status">
+      <span class="status-indicator-dot dot-good"></span>
+      <span>PyTorch CNN: <strong>Online</strong></span>
+    </span>
   </div>
 </div>
 
-<div class="row g-4">
-  <!-- Left Column: New Inspection Form with Drag-and-Drop + Live AI Preview -->
-  <div class="col-lg-5">
-    <div class="card shadow-sm">
-      <div class="card-header">
-        <span class="d-flex align-items-center gap-2">
-          <i class="bi bi-camera text-primary"></i>
-          Register Sample Inspection
-        </span>
-      </div>
-      <div class="card-body">
-        <form method="post" enctype="multipart/form-data" id="inspectionForm">
-          <!-- Batch Selection -->
-          <div class="mb-3">
-            <label class="form-label">Production Batch <span class="text-danger">*</span></label>
-            <select class="form-select" name="batch_id" required>
-              {% for b in batches %}
-              <option value="{{ b.id }}">{{ b.batch_code }} — {{ b.product_name }}</option>
-              {% endfor %}
-            </select>
-          </div>
-
-          <!-- Sample Reference -->
-          <div class="mb-3">
-            <label class="form-label">Sample Reference Code <span class="text-danger">*</span></label>
-            <input class="form-control" name="sample_ref" placeholder="e.g. ROTOR-SN-042" required>
-          </div>
-
-          <!-- Evidence Type -->
-          <div class="mb-3">
-            <label class="form-label">Evidence Type</label>
-            <select class="form-select" name="image_kind">
-              <option value="Item">Physical Item Front View</option>
-              <option value="Surface">Surface Detail / Macro</option>
-              <option value="Batch sample">Batch Representative Sample</option>
-            </select>
-          </div>
-
-          <!-- Interactive Drag & Drop Zone -->
-          <div class="mb-3">
-            <label class="form-label">Sample Image (JPG, PNG, WEBP)</label>
-            <div class="dropzone-container" id="dropzone">
-              <input type="file" name="image" id="fileInput" class="d-none" accept=".png,.jpg,.jpeg,.webp">
-              <div id="dropzonePrompt">
-                <i class="bi bi-cloud-arrow-up fs-1 text-primary d-block mb-1"></i>
-                <div class="fw-semibold text-light">Drag & drop image here, or <span class="text-primary text-decoration-underline">browse</span></div>
-                <div class="small text-muted mt-1">Supports PNG, JPG, WEBP (Max 8 MB)</div>
-              </div>
-              <img id="imagePreview" class="dropzone-preview img-fluid" alt="Preview">
-            </div>
-
-            <!-- Live Prediction Feedback Box (AJAX) -->
-            <div class="live-prediction-box" id="livePredictBox">
-              <div class="d-flex justify-content-between align-items-center mb-1">
-                <span class="small fw-bold text-muted text-uppercase">Live AI Screening Result</span>
-                <span class="badge" id="livePredictBadge">Analyzing...</span>
-              </div>
-              <div class="small text-muted d-flex justify-content-between">
-                <span>Confidence Estimate:</span>
-                <span class="fw-bold text-light" id="liveConfidenceText">--</span>
-              </div>
-              <div class="confidence-meter">
-                <div class="confidence-bar" id="liveConfidenceBar" style="width: 0%;"></div>
-              </div>
-              <div class="small text-dim mt-2 d-flex justify-content-between">
-                <span id="liveLatencyText">Latency: -- ms</span>
-                <span id="liveModelText">Model: {{ model_info.version if model_info else 'casting-hog-svm-v1' }}</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Observation / Notes -->
-          <div class="mb-4">
-            <label class="form-label">Physical Observation Notes</label>
-            <textarea class="form-control" name="observation" rows="3" placeholder="Note any visible cracks, inclusions, pitting, or surface roughness..."></textarea>
-          </div>
-
-          <button type="submit" class="btn btn-primary w-100 py-2">
-            <i class="bi bi-shield-check me-1"></i> Save Inspection Record
-          </button>
-        </form>
-      </div>
+<!-- Search & Filtering Toolbar -->
+<div class="card-clean" style="padding: 14px 18px; margin-bottom: 20px;">
+  <form method="get" id="filterForm" style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+    <!-- Search Query -->
+    <div style="flex: 1; min-width: 240px; position: relative;">
+      <i class="bi bi-search" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.85rem;"></i>
+      <input class="form-input-clean" name="q" value="{{ search_query or '' }}" placeholder="Search sample ref, batch code, or product name..." style="padding-left: 32px;" aria-label="Search inspections">
     </div>
+
+    <!-- Batch Filter -->
+    <div style="min-width: 180px;">
+      <select class="form-select-clean" name="batch_id" onchange="this.form.submit()" aria-label="Filter by batch">
+        <option value="">All Production Batches</option>
+        {% for b in batches %}
+        <option value="{{ b.id }}" {% if batch_filter == b.id|string %}selected{% endif %}>
+          {{ b.batch_code }} ({{ b.product_name }})
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- Status Tabs -->
+    <div style="display: flex; gap: 4px; border: 1px solid var(--border-hairline); border-radius: var(--radius-sm); padding: 3px; background-color: var(--bg-hover);">
+      <a href="{{ url_for('inspections', q=search_query, batch_id=batch_filter) }}" 
+         class="nav-link {% if not status_filter %}active{% endif %}" style="font-size: 0.8rem; padding: 4px 10px;">
+        All ({{ total_count }})
+      </a>
+      <a href="{{ url_for('inspections', q=search_query, batch_id=batch_filter, status='pending') }}" 
+         class="nav-link {% if status_filter == 'pending' %}active{% endif %}" style="font-size: 0.8rem; padding: 4px 10px;">
+        <span class="status-indicator-dot dot-review" style="width: 6px; height: 6px;"></span> Needs Review
+      </a>
+      <a href="{{ url_for('inspections', q=search_query, batch_id=batch_filter, status='defective') }}" 
+         class="nav-link {% if status_filter == 'defective' %}active{% endif %}" style="font-size: 0.8rem; padding: 4px 10px;">
+        <span class="status-indicator-dot dot-defect" style="width: 6px; height: 6px;"></span> Defective
+      </a>
+      <a href="{{ url_for('inspections', q=search_query, batch_id=batch_filter, status='good') }}" 
+         class="nav-link {% if status_filter == 'good' %}active{% endif %}" style="font-size: 0.8rem; padding: 4px 10px;">
+        <span class="status-indicator-dot dot-good" style="width: 6px; height: 6px;"></span> Good
+      </a>
+      <a href="{{ url_for('inspections', q=search_query, batch_id=batch_filter, status='disputed') }}" 
+         class="nav-link {% if status_filter == 'disputed' %}active{% endif %}" style="font-size: 0.8rem; padding: 4px 10px;">
+        <span class="status-indicator-dot" style="width: 6px; height: 6px; background-color: var(--status-review-dot);"></span> Disputed
+      </a>
+    </div>
+
+    <!-- Clear Filters Button -->
+    {% if search_query or status_filter or batch_filter %}
+    <a href="{{ url_for('inspections') }}" class="btn-custom-outline" style="font-size: 0.8rem; padding: 7px 12px;" title="Reset all filters">
+      <i class="bi bi-x-circle"></i> Reset
+    </a>
+    {% endif %}
+  </form>
+</div>
+
+<div class="two-col-layout">
+  <!-- Left Column: Register Sample & AI Screening -->
+  <div class="card-clean">
+    <div class="card-header-clean">
+      <h2 class="card-title-clean">Register Sample Inspection</h2>
+      <span style="font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono);">FORM #QC-01</span>
+    </div>
+    
+    <form method="post" enctype="multipart/form-data" id="inspectionForm" onsubmit="handleInspectionSubmit(event)">
+      <!-- Production Batch -->
+      <div class="form-group-clean">
+        <label class="form-label-clean" for="batchSelect">Production Batch <span style="color: var(--status-defect-text);">*</span></label>
+        <select class="form-select-clean" name="batch_id" id="batchSelect" required>
+          <option value="" disabled {% if not batch_filter %}selected{% endif %}>Select production lot...</option>
+          {% for b in batches %}
+          <option value="{{ b.id }}" {% if batch_filter == b.id|string %}selected{% endif %}>
+            {{ b.batch_code }} — {{ b.product_name }} ({{ b.status }})
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Sample Reference -->
+      <div class="form-group-clean">
+        <label class="form-label-clean" for="sampleRef">Sample Reference <span style="color: var(--status-defect-text);">*</span></label>
+        <input class="form-input-clean" name="sample_ref" id="sampleRef" placeholder="e.g. ROTOR-SN-042 or SMP-108" required>
+      </div>
+
+      <!-- Evidence Type -->
+      <div class="form-group-clean">
+        <label class="form-label-clean" for="imageKind">Evidence Optical Angle</label>
+        <select class="form-select-clean" name="image_kind" id="imageKind">
+          <option value="Item" selected>Physical item front view</option>
+          <option value="Surface">Surface macro view (defect detail)</option>
+          <option value="Batch sample">Batch representative sample</option>
+        </select>
+      </div>
+
+      <!-- Drag & Drop Optical Evidence Uploader -->
+      <div class="form-group-clean">
+        <label class="form-label-clean">Sample Evidence Image</label>
+        
+        <div class="dropzone-industrial" id="dropzoneBox" onclick="document.getElementById('imageFileInput').click()">
+          <input type="file" id="imageFileInput" name="image" accept=".png,.jpg,.jpeg,.webp" style="display: none;" onchange="handleFileSelected(this)">
+          <div class="dropzone-icon">
+            <i class="bi bi-cloud-arrow-up"></i>
+          </div>
+          <div class="dropzone-title">Drop casting image here or browse</div>
+          <div class="dropzone-meta">PNG, JPG, WEBP up to 8MB · Stored in <code>uploads/user_images/</code></div>
+        </div>
+
+        <!-- Client-Side Preview Box -->
+        <div class="upload-preview-box" id="previewBox">
+          <div class="upload-preview-inner">
+            <img id="previewThumbnail" class="upload-preview-thumb" src="" alt="Selected sample preview">
+            <div class="upload-preview-details">
+              <div class="upload-preview-name" id="previewFilename">sample.jpg</div>
+              <div class="upload-preview-meta" id="previewFilesize">0 KB</div>
+            </div>
+            <button type="button" class="upload-remove-btn" onclick="clearSelectedFile()" data-tooltip="Remove selected image" aria-label="Remove image">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+        </div>
+
+        <div id="fileError" style="display: none; color: var(--status-defect-text); font-size: 0.78rem; margin-top: 6px;"></div>
+      </div>
+
+      <!-- Observation Notes -->
+      <div class="form-group-clean" style="margin-bottom: 24px;">
+        <label class="form-label-clean" for="observationNotes">Physical Observation Notes</label>
+        <textarea class="form-textarea-clean" name="observation" id="observationNotes" rows="2" placeholder="Describe surface finish, machining marks, porosity, or hairline cracks..."></textarea>
+      </div>
+
+      <!-- Submit Button with Dynamic Loading State -->
+      <button type="submit" class="form-btn-submit" id="submitBtn">
+        <i class="bi bi-cpu" id="submitIcon"></i>
+        <span id="submitLabel">Submit for AI Screening</span>
+      </button>
+    </form>
   </div>
 
-  <!-- Right Column: Inspections Data Table -->
-  <div class="col-lg-7">
-    <div class="card shadow-sm h-100">
-      <div class="card-header">
-        <span class="d-flex align-items-center gap-2">
-          <i class="bi bi-card-checklist text-primary"></i>
-          Inspection History Records
-        </span>
-        <span class="badge text-bg-secondary">{{ inspections|length }} Logged</span>
+  <!-- Right Column: Inspection History Log -->
+  <div class="card-clean">
+    <div class="card-header-clean">
+      <div>
+        <h2 class="card-title-clean">Inspection Log</h2>
+        <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 2px;">
+          Showing {{ inspections|length }} of {{ total_count }} total inspection records
+        </div>
       </div>
-      <div class="table-responsive">
-        <table class="table table-custom">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Batch / Sample</th>
-              <th>AI Screening</th>
-              <th>Human Review</th>
-              <th>Status</th>
-              <th class="text-end">Detail</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for i in inspections %}
-            <tr>
-              <td class="fw-bold text-light">#{{ i.id }}</td>
-              <td>
-                <div class="fw-semibold text-light">{{ i.batch_code }}</div>
-                <div class="small text-muted font-monospace">{{ i.sample_ref }}</div>
-              </td>
-              <td>
-                {% if i.ml_prediction and i.ml_prediction|lower == 'good' %}
-                  <span class="badge-status badge-good">
-                    <i class="bi bi-check-circle-fill"></i> Good
-                  </span>
-                {% elif i.ml_prediction and i.ml_prediction|lower == 'defective' %}
-                  <span class="badge-status badge-defective">
-                    <i class="bi bi-x-circle-fill"></i> Defective
-                  </span>
-                {% else %}
-                  <span class="badge-status badge-neutral">
-                    <i class="bi bi-dash-circle"></i> Unavailable
-                  </span>
-                {% endif %}
-                {% if i.ml_score is not none %}
-                  <div class="small text-muted font-monospace mt-1">{{ '%.1f'|format(i.ml_score * 100) }}% conf</div>
-                {% endif %}
-              </td>
-              <td>
-                {% if i.human_result and i.human_result|lower == 'good' %}
-                  <span class="badge-status badge-good">Good</span>
-                {% elif i.human_result and i.human_result|lower == 'defective' %}
-                  <span class="badge-status badge-defective">Defective</span>
-                {% elif i.human_result and i.human_result|lower == 'uncertain' %}
-                  <span class="badge-status badge-pending">Uncertain</span>
-                {% else %}
-                  <span class="badge-status badge-neutral">Pending</span>
-                {% endif %}
-              </td>
-              <td>
-                <span class="badge text-bg-dark border border-secondary border-opacity-50">
-                  {{ i.status }}
-                </span>
-              </td>
-              <td class="text-end">
-                <a href="{{ url_for('inspection_detail', inspection_id=i.id) }}" class="btn btn-sm btn-outline-primary py-1 px-2">
-                  <i class="bi bi-arrow-right"></i>
-                </a>
-              </td>
-            </tr>
-            {% else %}
-            <tr>
-              <td colspan="6" class="text-center text-muted py-5">
-                <i class="bi bi-search fs-2 d-block mb-2 text-dim"></i>
-                No inspections recorded yet. Fill out the form to inspect a sample.
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+      <div style="display: flex; gap: 8px;">
+        <a href="{{ url_for('report', batch_code=batch_filter) }}" class="btn-custom-outline" style="font-size: 0.8rem; padding: 6px 12px;">
+          <i class="bi bi-file-earmark-bar-graph"></i> Export Report
+        </a>
       </div>
     </div>
+
+    {% if inspections %}
+    <div style="overflow-x: auto;">
+      <table class="table-clean">
+        <thead>
+          <tr>
+            <th style="width: 10%;">ID</th>
+            <th style="width: 24%;">BATCH / SAMPLE</th>
+            <th style="width: 10%;">EVIDENCE</th>
+            <th style="width: 20%;">CNN SCREENING</th>
+            <th style="width: 16%;">HUMAN REVIEW</th>
+            <th style="width: 12%;">STATUS</th>
+            <th style="width: 8%; text-align: right;">ACTION</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in inspections %}
+          <tr>
+            <td style="color: var(--text-muted); font-family: var(--font-mono); font-weight: 600;">
+              #{{ r.id }}
+            </td>
+            <td>
+              <div style="font-weight: 600; color: var(--text-primary); font-size: 0.88rem;">{{ r.sample_ref }}</div>
+              <div style="font-size: 0.76rem; color: var(--text-muted);">
+                <a href="{{ url_for('inspections', batch_id=r.batch_id) }}" style="color: inherit; text-decoration: none;">
+                  Lot <strong>{{ r.batch_code }}</strong>
+                </a>
+              </div>
+            </td>
+            <td>
+              {% if r.image_name %}
+              <a href="{{ url_for('inspection_detail', inspection_id=r.id) }}" data-tooltip="View optical evidence #{{ r.id }}" style="display: inline-block;">
+                <img src="{{ url_for('uploaded_file', filename=r.image_name) }}" alt="Thumbnail" 
+                     style="width: 36px; height: 36px; object-fit: cover; border-radius: var(--radius-xs); border: 1px solid var(--border-hairline); background-color: #0b1120;">
+              </a>
+              {% else %}
+              <span style="font-size: 0.75rem; color: var(--text-dim); font-style: italic;">None</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if r.ml_prediction|lower == 'good' %}
+                <span class="pill-status pill-good">Good</span>
+              {% elif r.ml_prediction|lower == 'defective' %}
+                <span class="pill-status pill-defective">Defective</span>
+              {% else %}
+                <span class="pill-status pill-review">Manual</span>
+              {% endif %}
+
+              {% if r.ml_score is not none %}
+              <span style="font-size: 0.74rem; color: var(--text-muted); font-family: var(--font-mono); margin-left: 4px;">
+                {{ '%.1f'|format(r.ml_score * 100) }}%
+              </span>
+              {% endif %}
+            </td>
+            <td>
+              {% if r.human_result|lower in ['good', 'passed'] %}
+                <span class="pill-status pill-good">Passed</span>
+              {% elif r.human_result|lower == 'defective' %}
+                <span class="pill-status pill-defective">Defective</span>
+              {% else %}
+                <span class="pill-status pill-pending">Pending</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if 'Disputed' in r.status %}
+                <span class="pill-status pill-review" style="font-size: 0.72rem; padding: 2px 7px;">
+                  Disputed
+                </span>
+              {% elif 'Resolved' in r.status %}
+                <span class="pill-status pill-released" style="font-size: 0.72rem; padding: 2px 7px;">
+                  Resolved
+                </span>
+              {% elif r.status == 'Pending review' %}
+                <span style="font-size: 0.78rem; color: var(--status-review-text); font-weight: 500;">
+                  Needs review
+                </span>
+              {% else %}
+                <span style="font-size: 0.78rem; color: var(--text-secondary);">
+                  Reviewed
+                </span>
+              {% endif %}
+            </td>
+            <td style="text-align: right;">
+              <a href="{{ url_for('inspection_detail', inspection_id=r.id) }}" class="table-link" data-tooltip="Inspect record #{{ r.id }}" aria-label="Open inspection #{{ r.id }}">
+                Open →
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <!-- Honest Empty State -->
+    <div class="empty-state-box">
+      <i class="bi bi-inbox empty-state-icon"></i>
+      <div class="empty-state-title">No inspection records found</div>
+      <div class="empty-state-desc">
+        {% if search_query or status_filter or batch_filter %}
+        No inspections match the active search filters. Try clearing filters or searching with a different term.
+        {% else %}
+        No sample inspections have been registered yet. Use the registration panel on the left to screen your first casting part.
+        {% endif %}
+      </div>
+      {% if search_query or status_filter or batch_filter %}
+      <a href="{{ url_for('inspections') }}" class="btn-custom-outline" style="font-size: 0.85rem; padding: 6px 14px;">
+        Clear All Filters
+      </a>
+      {% endif %}
+    </div>
+    {% endif %}
   </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-  const dropzone = document.getElementById('dropzone');
-  const fileInput = document.getElementById('fileInput');
-  const imagePreview = document.getElementById('imagePreview');
-  const dropzonePrompt = document.getElementById('dropzonePrompt');
-  const livePredictBox = document.getElementById('livePredictBox');
-  const livePredictBadge = document.getElementById('livePredictBadge');
-  const liveConfidenceText = document.getElementById('liveConfidenceText');
-  const liveConfidenceBar = document.getElementById('liveConfidenceBar');
-  const liveLatencyText = document.getElementById('liveLatencyText');
+// Drag and Drop & Client-side Preview Logic
+const dropzone = document.getElementById('dropzoneBox');
+const fileInput = document.getElementById('imageFileInput');
+const previewBox = document.getElementById('previewBox');
+const previewThumb = document.getElementById('previewThumbnail');
+const previewName = document.getElementById('previewFilename');
+const previewSize = document.getElementById('previewFilesize');
+const fileError = document.getElementById('fileError');
+const submitBtn = document.getElementById('submitBtn');
+const submitLabel = document.getElementById('submitLabel');
+const submitIcon = document.getElementById('submitIcon');
 
-  // Trigger file selection on click
-  dropzone.addEventListener('click', () => fileInput.click());
-
-  // Drag & drop highlight
-  ['dragenter', 'dragover'].forEach(name => {
-    dropzone.addEventListener(name, (e) => {
+if (dropzone) {
+  ['dragenter', 'dragover'].forEach(eventName => {
+    dropzone.addEventListener(eventName, (e) => {
       e.preventDefault();
+      e.stopPropagation();
       dropzone.classList.add('dragover');
-    });
+    }, false);
   });
 
-  ['dragleave', 'drop'].forEach(name => {
-    dropzone.addEventListener(name, (e) => {
+  ['dragleave', 'drop'].forEach(eventName => {
+    dropzone.addEventListener(eventName, (e) => {
       e.preventDefault();
+      e.stopPropagation();
       dropzone.classList.remove('dragover');
-    });
+    }, false);
   });
 
   dropzone.addEventListener('drop', (e) => {
-    if (e.dataTransfer.files.length) {
-      fileInput.files = e.dataTransfer.files;
-      handleFileSelected(e.dataTransfer.files[0]);
+    const dt = e.dataTransfer;
+    const files = dt.files;
+    if (files && files.length > 0) {
+      fileInput.files = files;
+      handleFileSelected(fileInput);
     }
-  });
+  }, false);
+}
 
-  fileInput.addEventListener('change', (e) => {
-    if (e.target.files.length) {
-      handleFileSelected(e.target.files[0]);
-    }
-  });
+function handleFileSelected(input) {
+  fileError.style.display = 'none';
+  fileError.textContent = '';
 
-  function handleFileSelected(file) {
-    if (!file.type.match('image.*')) return;
-
-    // Show preview
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      imagePreview.src = e.target.result;
-      imagePreview.style.display = 'block';
-      dropzonePrompt.style.display = 'none';
-    };
-    reader.readAsDataURL(file);
-
-    // Call live prediction API
-    const formData = new FormData();
-    formData.append('image', file);
-
-    livePredictBox.style.display = 'block';
-    livePredictBadge.className = 'badge text-bg-secondary';
-    livePredictBadge.textContent = 'Analyzing...';
-    liveConfidenceText.textContent = 'Calculating...';
-    liveConfidenceBar.style.width = '30%';
-    liveConfidenceBar.style.backgroundColor = '#6366f1';
-
-    fetch('{{ url_for("api_predict") }}', {
-      method: 'POST',
-      body: formData
-    })
-    .then(r => r.json())
-    .then(data => {
-      if (data.status === 'success') {
-        const isGood = data.prediction === 'good';
-        livePredictBadge.className = isGood ? 'badge-status badge-good' : 'badge-status badge-defective';
-        livePredictBadge.innerHTML = isGood ? '<i class="bi bi-check-circle-fill"></i> GOOD' : '<i class="bi bi-x-circle-fill"></i> DEFECTIVE';
-        
-        const conf = data.confidence_percent || 0;
-        liveConfidenceText.textContent = conf + '%';
-        liveConfidenceBar.style.width = conf + '%';
-        liveConfidenceBar.style.backgroundColor = isGood ? '#10b981' : '#f43f5e';
-        liveLatencyText.textContent = 'Latency: ' + data.processing_ms + ' ms';
-      } else {
-        livePredictBadge.className = 'badge text-bg-warning';
-        livePredictBadge.textContent = 'Model Unavailable';
-        liveConfidenceText.textContent = 'N/A';
-      }
-    })
-    .catch(() => {
-      livePredictBadge.className = 'badge text-bg-secondary';
-      livePredictBadge.textContent = 'Ready for Save';
-    });
+  if (!input.files || !input.files[0]) {
+    previewBox.style.display = 'none';
+    return;
   }
-});
+
+  const file = input.files[0];
+  const maxBytes = 8 * 1024 * 1024; // 8MB
+
+  if (file.size > maxBytes) {
+    fileError.textContent = 'File size exceeds 8MB limit. Please select a compressed image.';
+    fileError.style.display = 'block';
+    clearSelectedFile();
+    return;
+  }
+
+  const validExts = ['png', 'jpg', 'jpeg', 'webp'];
+  const ext = file.name.split('.').pop().toLowerCase();
+  if (!validExts.includes(ext)) {
+    fileError.textContent = 'Unsupported file format. Please upload PNG, JPG, or WEBP.';
+    fileError.style.display = 'block';
+    clearSelectedFile();
+    return;
+  }
+
+  // Format size
+  let sizeText = '';
+  if (file.size < 1024 * 1024) {
+    sizeText = (file.size / 1024).toFixed(1) + ' KB';
+  } else {
+    sizeText = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+  }
+
+  previewName.textContent = file.name;
+  previewSize.textContent = sizeText;
+
+  // Read preview
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    previewThumb.src = e.target.result;
+    previewBox.style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearSelectedFile() {
+  fileInput.value = '';
+  previewBox.style.display = 'none';
+  previewBox.classList.remove('scanning-beam-active');
+  dropzone.classList.remove('scanning-beam-active');
+  previewThumb.src = '';
+  previewName.textContent = '';
+  previewSize.textContent = '';
+}
+
+function handleInspectionSubmit(e) {
+  if (submitBtn.disabled) {
+    e.preventDefault();
+    return false;
+  }
+  submitBtn.disabled = true;
+  submitIcon.className = 'spinner-border spinner-border-sm';
+  submitLabel.textContent = 'Screening with Deep CNN...';
+  
+  if (previewBox.style.display !== 'none') {
+    previewBox.classList.add('scanning-beam-active');
+  } else {
+    dropzone.classList.add('scanning-beam-active');
+  }
+  return true;
+}
 </script>
 {% endblock %}

@@ -1,6 +1,7 @@
 .venv/
 .venv312/
 .venv314/
+venv/
 __pycache__/
 *.py[cod]
 .env
@@ -8,3 +9,7 @@ data/
 uploads/*
 !uploads/.gitkeep
 quality.db
+quality.db.bak
+scratch_slides/
+static/b/
+templates/bc/

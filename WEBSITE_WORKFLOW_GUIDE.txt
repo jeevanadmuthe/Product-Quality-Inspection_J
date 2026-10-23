@@ -1,0 +1,307 @@
+================================================================================
+PRODUCT QUALITY INSPECTION & DEFECT TRACKING SYSTEM (QualityTrack)
+STEP-BY-STEP WORKFLOW GUIDE AFTER OPENING THE WEBSITE
+================================================================================
+
+Website URL: http://127.0.0.1:5000  (or http://localhost:5000)
+Backend: Flask + SQLite + PyTorch Deep Learning CNN (Grad-CAM)
+Design Standard: Industrial Minimalist Clean UI / ISO 2859-1 & ISO 9001 Compliant
+
+--------------------------------------------------------------------------------
+TABLE OF CONTENTS
+--------------------------------------------------------------------------------
+1. Initial Access & User Authentication (Role Selection)
+2. Executive Quality Dashboard (Overview & KPIs)
+3. Step 1: Product Catalog Management (/products)
+4. Step 2: Production Batch Creation & Management (/batches)
+5. Step 3: Registering Visual Inspections & AI CNN Screening (/inspections)
+6. Step 4: Dual-Lens Evidence Analysis & Human Disposition (/inspections/<id>)
+7. Step 5: Assigning & Tracking Corrective Actions - CAPA (/actions)
+8. Step 6: Batch Release / Hold Final Decision (/batches)
+9. Step 7: Generating Audit & Compliance Quality Reports (/report)
+10. Step 8: Immutable Audit Trail & History Inspection (/history)
+11. Step 9: Interactive CNN Model Architecture & Real-Time Screener (/model)
+12. Quick Reference: Role-Based Access Control (RBAC) Matrix
+
+================================================================================
+1. INITIAL ACCESS & USER AUTHENTICATION
+================================================================================
+When you open http://127.0.0.1:5000 in your web browser:
+If you are not yet authenticated, the system automatically redirects you to 
+the Industrial Sign-In Portal at:
+   URL: http://127.0.0.1:5000/login
+
+Choose one of the 3 pre-configured industrial roles (or click the quick-login cards):
+
+  A) Plant Quality Manager (Full Authority)
+     - Username: manager
+     - Password: manager123
+     - Role Capabilities: Batch release/hold decisions, audit history, reports,
+       CAPA actions, human dispositions, batch/product registration.
+
+  B) Quality Supervisor (Review & CAPA Lead)
+     - Username: supervisor
+     - Password: super123
+     - Role Capabilities: Review sign-offs, human dispositions, assign and
+       update Corrective Actions (CAPA), batch/product registration.
+
+  C) Quality Inspector (Floor Technician / Operator)
+     - Username: inspector
+     - Password: inspect123
+     - Role Capabilities: Upload visual inspection photos, run CNN screening,
+       register products and production batches, view reports.
+
+================================================================================
+2. EXECUTIVE QUALITY DASHBOARD (/dashboard)
+================================================================================
+Immediately after login, you land on the executive dashboard:
+   URL: http://127.0.0.1:5000/dashboard (or click "QualityTrack" / "Dashboard")
+
+WHAT TO REVIEW:
+  - Metric Ribbon:
+      * Active Batches: Total lots currently active in production.
+      * Registered Products: Manufactured part catalog count.
+      * Total Inspections: Total samples visually screened.
+      * Needs Review: Samples awaiting human verification.
+      * Confirmed Defects: Units rejected for structural/surface defects.
+      * Confirmed Good: Units accepted and passed.
+      * Active CAPA Actions: Open or in-progress corrective tasks.
+  - Inspection Trend Graph:
+      * 7-day throughput chart comparing daily Defective vs Good counts.
+  - Quality Rates:
+      * Pass Rate (%) and Defect Rate (%) calculated over evaluated samples.
+  - Model Status Pill (Top Right):
+      * Shows "CNN Deep Learning · 99.4%" (green dot) when PyTorch weights are
+        loaded, or "CNN Offline" (amber dot) if running in manual-only mode.
+  - Recent Inspections Table:
+      * Direct drill-down links to open any recent sample record.
+
+================================================================================
+3. STEP 1: PRODUCT CATALOG MANAGEMENT (/products)
+================================================================================
+Navigation: Click "Products" in the top navigation bar.
+URL: http://127.0.0.1:5000/products
+
+WORKFLOW:
+  1. Review existing catalog products (e.g., "Precision Cast Rotor Flange").
+  2. To register a new manufactured part:
+     - Locate the "Register Manufactured Part" form on the left.
+     - Part Name: Enter the name (e.g., "Cylinder Block Casting - High Duty").
+     - Specification Category: Default is "Metal casting" (or customize).
+     - Click "Register Product".
+  3. The product is immediately available in the batch creation dropdown.
+
+================================================================================
+4. STEP 2: PRODUCTION BATCH CREATION & MANAGEMENT (/batches)
+================================================================================
+Navigation: Click "Batches" in the top navigation bar.
+URL: http://127.0.0.1:5000/batches
+
+WORKFLOW:
+  1. Locate the "Register Production Batch" form on the left panel:
+     - Batch Code / Lot Identifier: Enter a unique identifier (e.g., B-105).
+     - Product Specification: Select the product from the dropdown.
+     - Lot Quantity: Enter total manufactured units (e.g., 50 or 100).
+     - Production Date: Pick the date of the production run.
+     - Click "Create Production Batch".
+  2. In the "Active Batch Inventory" table on the right:
+     - Check the new batch row showing:
+       * Batch Code, Part Name, Lot Size, Inspected Sample Count.
+       * Defect count badge (e.g., "1 defect").
+       * Current Status: "Open", "On hold", or "Released".
+  3. Click the sample count link (e.g., "0 inspected") to view or filter
+     inspections for that specific batch.
+
+================================================================================
+5. STEP 3: REGISTERING VISUAL INSPECTIONS & AI CNN SCREENING (/inspections)
+================================================================================
+Navigation: Click "Inspections" in the top navigation bar.
+URL: http://127.0.0.1:5000/inspections
+
+WORKFLOW:
+  1. Filter / Search Existing Records:
+     - Use the top search bar to filter by sample ref, batch code, or product.
+     - Use quick status filter tabs: "All", "Needs Review", "Defective", "Good".
+  2. Register a New Sample (Left Form "Register Sample Inspection #QC-01"):
+     - Production Batch: Select the batch (e.g., B-104 or B-105).
+     - Sample Reference: Enter sample ID (e.g., ITEM-001 or LOT-104-SMP03).
+     - Image Perspective: Choose "Item", "Surface", or "Batch sample".
+     - Visual Observation Notes: Enter notes (e.g., "Visual inspection of top
+       rim and bore; checked for porosity and hairline shrinkage").
+     - Optical Capture Image: Click "Choose File" and upload a casting image
+       (.jpg, .png, .webp).
+     - Click "Submit Sample for CNN Screening".
+  3. Automatic Pipeline Execution:
+     - The PyTorch CNN model processes the image in ~12 to 45 milliseconds.
+     - Performs Test-Time Augmentation (TTA) and outputs class probabilities.
+     - Backpropagates through convolutional layer 4_2 to compute Grad-CAM
+       Class Activation defect localization.
+     - Stores the raw optical image in uploads/user_images/ and the Grad-CAM
+       heatmap in uploads/aiml/.
+     - Automatically redirects you to the newly created Inspection Record page.
+
+================================================================================
+6. STEP 4: DUAL-LENS EVIDENCE ANALYSIS & HUMAN DISPOSITION (/inspections/<id>)
+================================================================================
+URL: http://127.0.0.1:5000/inspections/<id>
+
+WORKFLOW:
+  1. Examine the Dual-Lens Evidence Viewer:
+     - Left Pane (Optical Sensor Capture): Full-resolution original photo.
+     - Right Pane (Grad-CAM Defect Localization): Visual heatmap showing the
+       precise structural hotspot (red/amber) where defects were recognized.
+     - Inspector Observation Notes: Context logged during upload.
+  2. Inspect the CNN Machine Vision Diagnostic Panel:
+     - Classification Result:
+       * "Passed (Non-Defective)" (Green badge) OR
+       * "Defect Anomaly Detected" (Red badge)
+     - Calibrated Confidence Score: e.g., 99.8%.
+     - Inference Latency: Sub-50ms execution speed.
+     - Backbone architecture and model version manifest.
+  3. Human Quality Review Disposition (Requires Supervisor or Manager login):
+     - If logged in as Inspector, switch or sign in as supervisor or manager.
+     - Select Quality Decision:
+       * "Good — Release to next operation" (Passes item)
+       * "Defective — Segregate and quarantine" (Rejects item)
+       * "Uncertain — Require metrology / CMM lab check"
+     - Enter Disposition Notes / Audit Reason (e.g., "Confirmed porosity defect
+       on flange bore matching Grad-CAM hotspot").
+     - Click "Save Quality Disposition".
+     - The status immediately updates from "Pending review" to "Reviewed".
+
+================================================================================
+7. STEP 5: ASSIGNING & TRACKING CORRECTIVE ACTIONS - CAPA (/actions)
+================================================================================
+When a defect is detected or process deviation occurs:
+
+WORKFLOW:
+  1. Assign Action from Inspection Record (/inspections/<id>):
+     - Scroll to the bottom section: "Linked Corrective Actions (CAPA)".
+     - (Requires Supervisor or Manager role).
+     - Form Fields:
+       * Action Title: e.g., "Re-machine sealing face and verify mold venting".
+       * Assigned Owner: e.g., "Sarah Tooling" or "Line 3 Maintenance".
+       * Due Date: Select target resolution date.
+       * Action Notes / Containment Steps: e.g., "Quarantine adjacent 10 units".
+     - Click "Assign Corrective Action".
+  2. Manage Central CAPA Registry:
+     - Click "Actions" in the navbar -> http://127.0.0.1:5000/actions
+     - Review all active corrective actions across the facility.
+     - Filter/inspect owner, due date, sample reference, and status.
+     - To update progress (Supervisor or Manager):
+       * Use the "Update" form dropdown on any action card.
+       * Change status: "Open" -> "In progress" -> "Completed" (or "Reopened").
+       * Enter an update log message (appended with author timestamp).
+       * Click "Update Status".
+
+================================================================================
+8. STEP 6: BATCH RELEASE / HOLD FINAL DECISION (/batches)
+================================================================================
+Navigation: Click "Batches" in the top navigation bar.
+URL: http://127.0.0.1:5000/batches
+Role Required: Plant Quality Manager ("manager" / "manager123").
+
+WORKFLOW:
+  1. Once all sample inspections and CAPA actions for a batch are completed:
+  2. Locate the batch row in the Active Batch Inventory.
+  3. Click the "Decide ▾" dropdown button under the ACTIONS column.
+  4. Select New Disposition:
+     - "Released" -> If all samples passed defect tolerances; authorized for
+       downstream assembly or customer shipment.
+     - "Hold" -> If unresolved defects or active CAPA require quarantine.
+     - "Open" -> If production or testing is still underway.
+  5. Mandatory Reason Note: Enter an auditable reason (e.g., "All 5 samples
+     cleared visual & CMM dimensional checks. Approved for delivery.").
+  6. Click "Confirm".
+  7. The batch badge updates immediately to "Released" (green) or "On hold" (amber).
+
+================================================================================
+9. STEP 7: GENERATING AUDIT & COMPLIANCE QUALITY REPORTS (/report)
+================================================================================
+Navigation: Click "Reports" in the top navigation bar.
+URL: http://127.0.0.1:5000/report
+
+WORKFLOW:
+  1. Select Batch:
+     - Choose a specific batch (e.g., "B-104") or "All Production Batches".
+     - Click "Filter".
+  2. Review Compliance Metrics:
+     - Total Inspected Samples.
+     - Verified Pass Rate and Defect Rate.
+     - Open Actions requiring resolution.
+     - Table of grounded inspection records with AI score and human result.
+     - Table of linked CAPA actions with owners and current statuses.
+  3. Export / Print:
+     - Click the "Print Report / Export PDF" button.
+     - Uses standard browser print dialog to export a clean, formatted ISO-style
+       Quality Inspection Certificate.
+
+================================================================================
+10. STEP 8: IMMUTABLE AUDIT TRAIL & HISTORY INSPECTION (/history)
+================================================================================
+Navigation: Click "Audit Log" in the top navigation bar.
+URL: http://127.0.0.1:5000/history
+Role Required: Plant Quality Manager ("manager" / "manager123").
+
+WORKFLOW:
+  1. Access the tamper-evident chronological system ledger.
+  2. Every critical event is recorded with:
+     - Exact ISO Timestamp (e.g., 2026-10-23T09:40:15)
+     - Actor Username (e.g., inspector, supervisor, manager)
+     - Action Event (login, created product, created batch, created inspection,
+       reviewed disposition, created corrective action, batch decision)
+     - Target Record Type & ID (e.g., inspection #12, batch #2)
+     - Auditable Justification / Reason Note
+  3. Use this page for ISO 9001 quality audits and regulatory compliance reviews.
+
+================================================================================
+11. STEP 9: INTERACTIVE CNN MODEL & REAL-TIME SCREENER (/model)
+================================================================================
+Navigation: Click "CNN Model" in the top navigation bar.
+URL: http://127.0.0.1:5000/model-architecture (or /model)
+
+WORKFLOW:
+  1. Architecture & Performance Review:
+     - Review the 4-stage convolutional neural network specification:
+       * Stage 1: Specular boundary & edge feature filters.
+       * Stage 2: Metallic grain texture & circular porosity filters.
+       * Stage 3 & 4: Macro structural anomaly synthesis (blowholes, cracks).
+       * Grad-CAM Engine: Backward activation localization via conv4_2 layer.
+     - Check held-out test set accuracy (99.86%), precision, recall, and F1 score.
+     - Review the confusion matrix comparing Deep CNN against classical SVM.
+  2. Interactive Real-Time Screening Sandbox:
+     - Scroll to the "Interactive Real-Time CNN Screening" widget.
+     - Drag and drop or browse ANY casting image directly into the sandbox.
+     - Sub-50ms instant classification occurs without saving to the database.
+     - View the live side-by-side original image and Grad-CAM defect heatmap.
+     - Ideal for rapid bench testing or live product demonstrations.
+
+================================================================================
+12. QUICK REFERENCE: ROLE-BASED ACCESS CONTROL (RBAC) MATRIX
+================================================================================
+Target User Role Specification (Enforced by Backend via HTTP 403 Forbidden):
+
+Feature / Action                      Inspector      Supervisor     Manager
+--------------------------------------------------------------------------------
+Create Inspections & Upload Images    YES            YES           YES
+Add Technical Optical Observations    YES            YES           YES
+Confirm AI Suggestions                YES            YES           YES
+Challenge AI Suggestions (Dispute)    YES            YES           YES
+Resolve Disputed Inspection Cases     NO             NO            YES
+Handle Assigned Issues (CAPA)         NO             YES           YES
+Record Corrective Work Performed      NO             YES           YES
+Submit Follow-Up Evidence Attachments NO             YES           YES
+Execute Batch Release / Hold DecisionsNO             NO            YES
+Review Quality Trends & Settings      NO             NO            YES
+View System Audit Log (/history)      NO             NO            YES
+Generate & Print Quality Reports      YES            YES           YES
+Access CNN Architecture & Test SandboxYES            YES           YES
+--------------------------------------------------------------------------------
+
+Backend Enforcement:
+- Level 1 (Inspector): Line inspections, optical uploads, verify/challenge AI.
+- Level 2 (Supervisor): CAPA containment, corrective work, follow-up evidence.
+- Level 3 (Manager): Dispute settlement, batch release decisions, governance settings.
+
+END OF WORKFLOW GUIDE
+================================================================================

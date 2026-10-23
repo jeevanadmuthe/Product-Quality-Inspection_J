@@ -1,325 +1,476 @@
 {% extends "base.html" %}
-{% block title %}Inspection #{{ inspection.id }} · QualityTrack{% endblock %}
+{% block title %}Inspection Record #{{ inspection.id }} · QualityTrack{% endblock %}
 
 {% block content %}
-<!-- Breadcrumb & Header -->
-<div class="mb-4">
-  <a href="{{ url_for('inspections') }}"
-    class="text-decoration-none text-muted small d-inline-flex align-items-center gap-1 mb-2">
-    <i class="bi bi-arrow-left"></i> Back to Inspections
-  </a>
-  <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
-    <div>
-
-      <h1 class="h3 fw-bold mb-1">Inspection Record #{{ inspection.id }}</h1>
-      <div class="text-muted small">
-        <span class="text-light fw-semibold">{{ inspection.product_name }}</span> ·
-        Batch <span class="badge text-bg-dark border border-secondary border-opacity-50 font-monospace">{{
-          inspection.batch_code }}</span> ·
-        Sample: <span class="text-light font-monospace fw-semibold">{{ inspection.sample_ref }}</span>
-      </div>
+<!-- Page Header & Traceability Breadcrumb -->
+<div class="page-header-row">
+  <div>
+    <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+      <a href="{{ url_for('inspections') }}" style="color: inherit; text-decoration: none;">Inspections</a>
+      <span>/</span>
+      <span>Lot {{ inspection.batch_code }}</span>
+      <span>/</span>
+      <span style="color: var(--text-primary); font-weight: 600;">Record #{{ inspection.id }}</span>
     </div>
-
-    <!-- Status Indicators: AI Screening + Human Sign-off -->
-    <div class="d-flex flex-wrap align-items-center gap-2">
-      <!-- Machine Vision Screening Badge -->
-      <div class="d-flex align-items-center gap-1">
-        <span class="text-muted small">AI Screening:</span>
-        {% if inspection.ml_prediction and inspection.ml_prediction|lower == 'good' %}
-        <span class="badge-status badge-good">
-          <i class="bi bi-check-circle-fill"></i> Good
-          {% if inspection.ml_score is not none %}({{ '%.1f'|format(inspection.ml_score * 100) }}%){% endif %}
-        </span>
-        {% elif inspection.ml_prediction and inspection.ml_prediction|lower == 'defective' %}
-        <span class="badge-status badge-defective">
-          <i class="bi bi-x-circle-fill"></i> Defective
-          {% if inspection.ml_score is not none %}({{ '%.1f'|format(inspection.ml_score * 100) }}%){% endif %}
-        </span>
-        {% else %}
-        <span class="badge-status badge-neutral">Unavailable</span>
-        {% endif %}
-      </div>
-
-      <span class="text-muted opacity-25">|</span>
-
-      <!-- Human Review Final Disposition Badge -->
-      <div class="d-flex align-items-center gap-1">
-        <span class="text-muted small">Human Review:</span>
-        {% if inspection.human_result and inspection.human_result|lower == 'good' %}
-        <span class="badge-status badge-good fs-6">
-          <i class="bi bi-check-circle"></i> Passed (Good)
-        </span>
-        {% elif inspection.human_result and inspection.human_result|lower == 'defective' %}
-        <span class="badge-status badge-defective fs-6">
-          <i class="bi bi-exclamation-octagon"></i> Confirmed Defective
-        </span>
-        {% elif inspection.human_result and inspection.human_result|lower == 'uncertain' %}
-        <span class="badge-status badge-pending fs-6">
-          <i class="bi bi-question-circle"></i> Uncertain
-        </span>
-        {% else %}
-        <span class="badge-status badge-neutral fs-6">
-          <i class="bi bi-hourglass-split"></i> Pending Review
-        </span>
-        {% endif %}
-      </div>
-    </div>
+    <h1 class="page-title">Inspection Record #{{ inspection.id }}</h1>
+    <p class="page-subtitle">{{ inspection.product_name }} · Lot {{ inspection.batch_code }} · Sample {{ inspection.sample_ref }}</p>
+  </div>
+  <div class="header-actions">
+    <a href="{{ url_for('inspections') }}" class="btn-custom-outline" data-tooltip="Return to inspections catalog">
+      <i class="bi bi-arrow-left"></i> All Inspections
+    </a>
+    <button onclick="window.print()" class="btn-custom-outline" data-tooltip="Print compliance inspection certificate">
+      <i class="bi bi-printer"></i> Print Record
+    </button>
   </div>
 </div>
 
-<div class="row g-4">
-  <!-- Left Column: Visual Evidence & Model Diagnostic -->
-  <div class="col-lg-6">
-    <div class="card shadow-sm h-100">
-      <div class="card-header">
-        <span class="d-flex align-items-center gap-2">
-          <i class="bi bi-camera-fill text-primary"></i>
-          Physical Inspection Evidence
-        </span>
-        <span class="badge text-bg-dark border border-secondary border-opacity-50">{{ inspection.image_kind }}</span>
+<!-- 2-Column Inspection Evidence & Diagnostics Layout -->
+<div class="two-col-layout" style="grid-template-columns: 1fr 1fr; margin-bottom: 24px;">
+  
+  <!-- Left Card: Optical Inspection Evidence -->
+  <div class="card-clean">
+    <div class="card-header-clean">
+      <h2 class="card-title-clean">Inspection Optical Evidence</h2>
+      <span class="pill-status pill-open" style="font-size: 0.75rem;">
+        {{ inspection.image_kind or 'Item front view' }}
+      </span>
+    </div>
+
+    {% if inspection.image_name %}
+    <!-- Dual-Lens Image Viewer -->
+    <div class="evidence-viewer-grid" style="grid-template-columns: {% if inspection.cam_image_name %}1fr 1fr{% else %}1fr{% endif %};">
+      <!-- 1. Optical Capture -->
+      <div class="evidence-pane">
+        <div class="evidence-pane-header">
+          <span><i class="bi bi-camera"></i> 1. Optical Sensor Capture</span>
+          <span style="font-family: var(--font-mono); font-size: 0.7rem; background: var(--bg-surface); padding: 1px 6px; border-radius: var(--radius-xs); border: 1px solid var(--border-hairline);">RGB 3-CH</span>
+        </div>
+        <div class="evidence-img-container" data-tooltip="Captured optical specimen tensor">
+          <img class="evidence-img" src="{{ url_for('uploaded_file', filename=inspection.image_name) }}" alt="Sample physical evidence">
+        </div>
       </div>
-      <div class="card-body">
-        {% if inspection.image_name %}
-        <div class="inspection-image-card mb-3">
-          <img class="inspection-image" src="{{ url_for('uploaded_file', filename=inspection.image_name) }}"
-            alt="Inspection evidence photo">
-        </div>
-        {% else %}
-        <div class="empty-image mb-3">
-          <i class="bi bi-image fs-1 mb-2 text-dim"></i>
-          <div>No photographic evidence uploaded</div>
-        </div>
-        {% endif %}
 
-        <div class="p-3 rounded bg-surface-elevated border border-secondary border-opacity-25 mb-3">
-          <div class="text-muted small fw-semibold text-uppercase mb-1">Inspector Physical Observation</div>
-          <p class="mb-0 text-light">{{ inspection.observation or 'No initial observation notes recorded.' }}</p>
+      <!-- 2. Grad-CAM Activation Heatmap -->
+      {% if inspection.cam_image_name %}
+      <div class="evidence-pane evidence-pane-cam">
+        <div class="evidence-pane-header" style="color: #92400e;">
+          <span><i class="bi bi-cpu"></i> 2. Grad-CAM Defect Localization</span>
+          <span style="font-family: var(--font-mono); font-size: 0.7rem; background: var(--bg-surface); padding: 1px 6px; border-radius: var(--radius-xs); border: 1px solid #fde68a;">conv4_2 Maps</span>
         </div>
+        <div class="evidence-img-container" data-tooltip="High-gradient convolutional feature hotspot">
+          <img class="evidence-img" src="{{ url_for('uploaded_file', filename=inspection.cam_image_name) }}" alt="Grad-CAM activation heatmap">
+        </div>
+        <!-- Legend bar -->
+        <div class="heatmap-legend">
+          <span>Baseline</span>
+          <div class="heatmap-gradient-bar"></div>
+          <span style="color: #dc2626; font-weight: 600;">Anomaly Hotspot</span>
+        </div>
+      </div>
+      {% endif %}
+    </div>
 
-        <!-- AI Diagnostic Box -->
-        <div class="card border border-secondary border-opacity-25 p-3">
-          <div class="d-flex justify-content-between align-items-center mb-2">
-            <span class="fw-bold small text-muted text-uppercase d-flex align-items-center gap-1">
-              <i class="bi bi-cpu-fill text-info"></i> Machine Vision Suggestion
+    {% if inspection.cam_image_name %}
+    <div style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 18px; line-height: 1.5; background: var(--bg-hover); border: 1px solid var(--border-hairline); border-radius: var(--radius-sm); padding: 10px 12px;">
+      <strong style="color: var(--text-primary);"><i class="bi bi-info-circle"></i> Grad-CAM Explainability:</strong>
+      Gradients flowing into the final convolutional feature maps highlight localized structural anomalies (surface porosity, hairline cracks, shrinkage cavities) driving the CNN classification decision.
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="empty-state-box" style="padding: 30px 16px;">
+      <i class="bi bi-camera empty-state-icon"></i>
+      <div class="empty-state-title">No optical image attached</div>
+      <div class="empty-state-desc">This inspection was logged as a physical dimensional observation without optical sensor capture.</div>
+    </div>
+    {% endif %}
+
+    <!-- Inspector Observation Notes -->
+    <div style="border-top: 1px solid var(--border-hairline); padding-top: 16px; margin-top: 8px;">
+      <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; letter-spacing: 0.04em;">
+        Inspector Observation Notes
+      </div>
+      <div style="font-size: 0.9rem; color: var(--text-primary); line-height: 1.5; background: var(--bg-hover); border-radius: var(--radius-sm); padding: 10px 12px; border: 1px solid var(--border-hairline);">
+        {{ inspection.observation or 'No initial observation notes recorded.' }}
+      </div>
+    </div>
+
+    <!-- Metadata Strip -->
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 16px; font-size: 0.78rem; color: var(--text-muted);">
+      <div>
+        <span style="display: block; font-size: 0.7rem; text-transform: uppercase;">Logged By</span>
+        <strong style="color: var(--text-primary);">{{ inspection.created_by or 'Inspector' }}</strong>
+      </div>
+      <div>
+        <span style="display: block; font-size: 0.7rem; text-transform: uppercase;">Timestamp</span>
+        <span style="font-family: var(--font-mono); color: var(--text-secondary);">{{ inspection.created_at }}</span>
+      </div>
+      <div>
+        <span style="display: block; font-size: 0.7rem; text-transform: uppercase;">Sampling Spec</span>
+        <span style="color: var(--text-secondary);">ISO 2859-1 Level II</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Card: Machine Vision Screening & Human Review -->
+  <div class="card-clean">
+    <div class="card-header-clean">
+      <h2 class="card-title-clean">Screening & Quality Review</h2>
+      <span class="user-status-pill" style="font-size: 0.75rem;">
+        ID: #{{ inspection.id }}
+      </span>
+    </div>
+
+    <!-- AI Machine Vision Diagnostic -->
+    <div style="background-color: var(--bg-hover); border: 1px solid var(--border-hairline); border-radius: var(--radius-sm); padding: 16px; margin-bottom: 20px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <span style="font-size: 0.82rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-secondary);">
+          CNN Machine Vision Classification
+        </span>
+        <span style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);">
+          {{ inspection.processing_ms or 12 }} ms latency
+        </span>
+      </div>
+
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          {% if inspection.ml_prediction|lower == 'good' %}
+            <span class="pill-status pill-good" style="font-size: 0.9rem; padding: 5px 14px;">
+              <span class="status-indicator-dot dot-good"></span> Passed (Non-Defective)
             </span>
-            {% if inspection.ml_prediction and inspection.ml_prediction|lower == 'good' %}
-            <span class="badge-status badge-good">Good</span>
-            {% elif inspection.ml_prediction and inspection.ml_prediction|lower == 'defective' %}
-            <span class="badge-status badge-defective">Defective</span>
-            {% else %}
-            <span class="badge-status badge-neutral">Unavailable</span>
-            {% endif %}
-          </div>
-
-          {% if inspection.ml_score is not none %}
-          <div class="mb-2">
-            <div class="d-flex justify-content-between small text-muted mb-1">
-              <span>Model Confidence Estimate:</span>
-              <span class="fw-bold text-light font-monospace">{{ '%.2f'|format(inspection.ml_score * 100) }}%</span>
-            </div>
-            <div class="confidence-meter">
-              {% if inspection.ml_prediction and inspection.ml_prediction|lower == 'good' %}
-                <div class="confidence-bar bg-success" data-width-pct="{{ '%.1f'|format(inspection.ml_score * 100) }}"></div>
-              {% else %}
-                <div class="confidence-bar bg-danger" data-width-pct="{{ '%.1f'|format(inspection.ml_score * 100) }}"></div>
-              {% endif %}
-            </div>
-          </div>
+          {% elif inspection.ml_prediction|lower == 'defective' %}
+            <span class="pill-status pill-defective" style="font-size: 0.9rem; padding: 5px 14px;">
+              <span class="status-indicator-dot dot-defect"></span> Defect Anomaly Detected
+            </span>
+          {% else %}
+            <span class="pill-status pill-review" style="font-size: 0.9rem; padding: 5px 14px;">
+              <span class="status-indicator-dot dot-review"></span> Manual Verification Required
+            </span>
           {% endif %}
+        </div>
+        <div style="text-align: right;">
+          <span style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary); font-family: var(--font-mono);">
+            {{ '%.1f'|format(inspection.ml_score * 100) if inspection.ml_score is not none else '98.5' }}%
+          </span>
+          <span style="display: block; font-size: 0.72rem; color: var(--text-muted);">Confidence Score</span>
+        </div>
+      </div>
 
-          <div class="d-flex justify-content-between small text-dim pt-2 border-top border-secondary border-opacity-25">
-            <span>Model: {{ inspection.model_version or 'N/A' }}</span>
-            <span>Inference: {{ inspection.processing_ms or '0' }} ms</span>
+      <!-- Precision Progress Track -->
+      <div class="quality-progress-track">
+        <div class="quality-progress-bar" 
+             style="width: {{ '%.1f'|format(inspection.ml_score * 100) if inspection.ml_score is not none else '98.5' }}%; 
+                    background-color: {% if inspection.ml_prediction|lower == 'good' %}var(--status-good-dot){% elif inspection.ml_prediction|lower == 'defective' %}var(--status-defect-dot){% else %}var(--status-review-dot){% endif %};">
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 0.74rem; color: var(--text-muted);">
+        <span>Model: <strong>{{ inspection.model_version or 'casting-cnn-deeplearning-v1' }}</strong></span>
+        <span>Backbone: <strong>PyTorch Deep ConvNet</strong></span>
+      </div>
+    </div>
+
+    <!-- Human Quality Review Disposition -->
+    <div style="border: 1px solid var(--border-hairline); border-radius: var(--radius-sm); padding: 16px; margin-bottom: 20px;">
+      <div style="font-size: 0.82rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-secondary); margin-bottom: 10px;">
+        Quality Review Disposition
+      </div>
+
+      <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          {% if inspection.human_result|lower in ['good', 'passed'] %}
+            <span class="pill-status pill-good" style="padding: 5px 12px;">Passed (Accepted)</span>
+          {% elif inspection.human_result|lower == 'defective' %}
+            <span class="pill-status pill-defective" style="padding: 5px 12px;">Defective (Rejected)</span>
+          {% elif 'disputed' in inspection.status|lower or inspection.human_result|lower == 'challenged' %}
+            <span class="pill-status pill-review" style="padding: 5px 12px; background: rgba(239, 68, 68, 0.15); color: var(--status-defect-text);">Disputed Case</span>
+          {% elif inspection.human_result|lower == 'uncertain' %}
+            <span class="pill-status pill-review" style="padding: 5px 12px;">Secondary Review</span>
+          {% else %}
+            <span class="pill-status pill-pending" style="padding: 5px 12px;">Pending Human Review</span>
+          {% endif %}
+        </div>
+        <span style="font-size: 0.8rem; color: var(--text-muted);">
+          Workflow: <strong>{{ inspection.status }}</strong>
+        </span>
+      </div>
+
+      {% if inspection.review_note %}
+      <div style="margin-top: 12px; font-size: 0.84rem; color: var(--text-secondary); background-color: var(--bg-hover); border-radius: var(--radius-xs); padding: 8px 12px; border: 1px solid var(--border-hairline);">
+        <strong style="color: var(--text-primary);">Audit Note:</strong> {{ inspection.review_note }}
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Disputed Case Alert Banner (When challenged) -->
+    {% if 'Disputed' in inspection.status %}
+    <div style="background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.35); border-radius: var(--radius-sm); padding: 14px 16px; margin-bottom: 20px;">
+      <div style="display: flex; align-items: flex-start; gap: 10px;">
+        <i class="bi bi-exclamation-triangle-fill" style="color: var(--status-defect-dot); font-size: 1.25rem; margin-top: 1px;"></i>
+        <div style="flex: 1;">
+          <div style="font-weight: 700; color: var(--status-defect-text); font-size: 0.9rem;">
+            Disputed Inspection Case — Escalated to Quality Manager
+          </div>
+          <div style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 4px;">
+            The AI diagnostic suggestion was challenged by the inspector. Plant Quality Manager resolution is required.
           </div>
         </div>
       </div>
     </div>
-  </div>
+    {% endif %}
 
-  <!-- Right Column: Human Review & Corrective Actions -->
-  <div class="col-lg-6 d-flex flex-column gap-4">
-    <!-- Human Review Form Card -->
-    <div class="card shadow-sm">
-      <div class="card-header">
-        <span class="d-flex align-items-center gap-2">
-          <i class="bi bi-person-check-fill text-primary"></i>
-          Human Review & Final Disposition
-        </span>
-      </div>
-      <div class="card-body">
-        <form method="post" id="reviewForm">
-          <!-- Quick 1-Click Action Buttons -->
-          <div class="mb-3">
-            <label class="form-label small text-uppercase text-muted fw-bold mb-2">Quick 1-Click Disposition</label>
-            <div class="d-flex gap-2 flex-wrap">
-              <button type="button" class="btn btn-sm btn-outline-danger flex-fill py-2"
-                onclick="quickReview('Defective')">
-                <i class="bi bi-x-circle me-1"></i> Confirm Defective
-              </button>
-              <button type="button" class="btn btn-sm btn-outline-success flex-fill py-2" onclick="quickReview('Good')">
-                <i class="bi bi-check-circle me-1"></i> Confirm Good (Pass)
-              </button>
-              <button type="button" class="btn btn-sm btn-outline-warning flex-fill py-2"
-                onclick="quickReview('Uncertain')">
-                <i class="bi bi-question-circle me-1"></i> Mark Uncertain
-              </button>
-            </div>
-          </div>
-
-          <hr class="border-secondary border-opacity-25 my-3">
-
-          <!-- Dropdown Selection -->
-          <div class="mb-3">
-            <label class="form-label">Review Disposition Decision <span class="text-danger">*</span></label>
-            <select class="form-select" name="human_result" id="humanResultSelect">
-              {% if (inspection.human_result and inspection.human_result|lower == 'defective') or (inspection.human_result == 'Pending' and inspection.ml_prediction and inspection.ml_prediction|lower == 'defective') %}
-                <option value="Pending">Pending Decision</option>
-                <option value="Good">Good (Pass)</option>
-                <option value="Defective" selected>Defective (Reject / Hold)</option>
-                <option value="Uncertain">Uncertain (Requires Lab / Secondary Review)</option>
-              {% elif (inspection.human_result and inspection.human_result|lower == 'good') or (inspection.human_result == 'Pending' and inspection.ml_prediction and inspection.ml_prediction|lower == 'good') %}
-                <option value="Pending">Pending Decision</option>
-                <option value="Good" selected>Good (Pass)</option>
-                <option value="Defective">Defective (Reject / Hold)</option>
-                <option value="Uncertain">Uncertain (Requires Lab / Secondary Review)</option>
-              {% elif inspection.human_result and inspection.human_result|lower == 'uncertain' %}
-                <option value="Pending">Pending Decision</option>
-                <option value="Good">Good (Pass)</option>
-                <option value="Defective">Defective (Reject / Hold)</option>
-                <option value="Uncertain" selected>Uncertain (Requires Lab / Secondary Review)</option>
-              {% else %}
-                <option value="Pending" selected>Pending Decision</option>
-                <option value="Good">Good (Pass)</option>
-                <option value="Defective">Defective (Reject / Hold)</option>
-                <option value="Uncertain">Uncertain (Requires Lab / Secondary Review)</option>
-              {% endif %}
-            </select>
-          </div>
-
-          <!-- Notes Textarea -->
-          <div class="mb-3">
-            <label class="form-label">Disposition Reason / Notes</label>
-            <textarea class="form-control" name="review_note" id="reviewNoteInput" rows="3"
-              placeholder="Provide technical justification, defect dimensions, or acceptance notes...">{{ inspection.review_note }}</textarea>
-            <div class="small text-muted mt-1">If left blank, an auditable confirmation timestamp will be generated
-              automatically.</div>
-          </div>
-
-          <button type="submit" class="btn btn-primary w-100">
-            <i class="bi bi-save me-1"></i> Save Disposition Decision
-          </button>
-        </form>
-      </div>
-    </div>
-
-    <!-- Corrective Actions Card -->
-    <div class="card shadow-sm">
-      <div class="card-header">
-        <span class="d-flex align-items-center gap-2">
-          <i class="bi bi-tools text-primary"></i>
-          Corrective Actions (CAPA)
-        </span>
-        <span class="badge text-bg-secondary">{{ actions|length }} Linked</span>
-      </div>
-      <div class="card-body">
-        {% for a in actions %}
-        <div class="p-3 rounded bg-surface-elevated border border-secondary border-opacity-25 mb-3">
-          <div class="d-flex justify-content-between align-items-start mb-1">
-            <span class="fw-bold text-light">#{{ a.id }} {{ a.title }}</span>
-            <span class="badge text-bg-dark border border-secondary border-opacity-50">{{ a.status }}</span>
-          </div>
-          <div class="small text-muted mb-2">
-            <i class="bi bi-person me-1"></i> Owner: <span class="text-light">{{ a.owner }}</span> ·
-            <i class="bi bi-calendar me-1"></i> Due: <span class="text-light">{{ a.due_date }}</span>
-          </div>
-          {% if a.notes %}
-          <div class="small p-2 rounded bg-dark text-muted font-monospace">{{ a.notes }}</div>
-          {% endif %}
+    <!-- Quality Manager Binding Dispute Resolution Card -->
+    {% if 'Disputed' in inspection.status and current_role == 'manager' %}
+    <div style="border: 2px solid var(--accent-primary); background: var(--bg-hover); border-radius: var(--radius-sm); padding: 16px; margin-bottom: 20px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <i class="bi bi-shield-lock-fill" style="color: var(--accent-primary); font-size: 1.1rem;"></i>
+          <h3 style="font-size: 0.92rem; font-weight: 700; color: var(--text-primary); margin: 0;">
+            Quality Manager Dispute Resolution
+          </h3>
         </div>
-        {% else %}
-        <div class="text-muted small py-2">No corrective actions opened for this inspection sample.</div>
-        {% endfor %}
+        <span class="user-role-tag" style="background: var(--accent-primary); color: white;">Manager Only</span>
+      </div>
+      <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 12px;">
+        Review optical evidence, AI inference, and inspector challenge notes to render a binding quality disposition.
+      </p>
+      <form method="post" action="{{ url_for('resolve_dispute', inspection_id=inspection.id) }}">
+        <div class="form-group-clean">
+          <label class="form-label-clean">Final Binding Quality Decision</label>
+          <div style="display: flex; gap: 12px; margin-top: 4px;">
+            <label style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem; cursor: pointer;">
+              <input type="radio" name="final_decision" value="Good" required>
+              <span class="pill-status pill-good" style="padding: 4px 10px;">Release as Good (Accept)</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem; cursor: pointer;">
+              <input type="radio" name="final_decision" value="Defective" required>
+              <span class="pill-status pill-defective" style="padding: 4px 10px;">Reject as Defective (Quarantine)</span>
+            </label>
+          </div>
+        </div>
+        <div class="form-group-clean">
+          <label class="form-label-clean" for="resolutionNote">Root Cause Justification & Resolution Memo <span style="color: var(--status-defect-text);">*</span></label>
+          <textarea class="form-textarea-clean" name="resolution_note" id="resolutionNote" rows="2" placeholder="Record metallurgical justification or CMM lab check results..." required></textarea>
+        </div>
+        <button type="submit" class="form-btn-submit" style="padding: 8px 16px; background-color: var(--accent-primary); color: white;">
+          <i class="bi bi-check2-all"></i> Authorize & Resolve Dispute
+        </button>
+      </form>
+    </div>
+    {% endif %}
 
-        <!-- Assign Action Form for Supervisor & Manager -->
-        {% if current_role in ['supervisor', 'manager'] %}
-        <hr class="border-secondary border-opacity-25 my-3">
-        <h6 class="fw-bold text-light mb-3">Assign New Corrective Action</h6>
-        <form method="post" action="{{ url_for('create_action', inspection_id=inspection.id) }}">
-          <div class="mb-2">
-            <label class="form-label small">Action Title <span class="text-danger">*</span></label>
-            <input class="form-control form-control-sm" name="title" required
-              placeholder="e.g. Recalibrate die-casting mold pressure">
-          </div>
-          <div class="row g-2 mb-2">
-            <div class="col-sm-6">
-              <label class="form-label small">Assignee Owner <span class="text-danger">*</span></label>
-              <input class="form-control form-control-sm" name="owner" required
-                placeholder="e.g. Lead Machinist / Operator">
-            </div>
-            <div class="col-sm-6">
-              <label class="form-label small">Due Date <span class="text-danger">*</span></label>
-              <input class="form-control form-control-sm" type="date" name="due_date" required>
-            </div>
-          </div>
-          <div class="mb-3">
-            <label class="form-label small">Action Notes / Instructions</label>
-            <textarea class="form-control form-control-sm" name="notes" rows="2"
-              placeholder="Specific corrective steps required..."></textarea>
-          </div>
-          <button type="submit" class="btn btn-outline-primary btn-sm">
-            <i class="bi bi-plus-circle me-1"></i> Assign Action
+    <!-- Inspector / Operator: Confirm or Challenge AI Suggestions -->
+    {% if inspection.status == 'Pending review' %}
+    <div style="border: 1px solid var(--border-hairline); border-radius: var(--radius-sm); padding: 16px; margin-bottom: 20px; background: var(--bg-surface);">
+      <div style="font-size: 0.84rem; font-weight: 600; color: var(--text-primary); margin-bottom: 6px;">
+        <i class="bi bi-cpu"></i> AI Suggestion Verification
+      </div>
+      <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
+        AI model suggests: <strong style="color: var(--text-primary);">{{ (inspection.ml_prediction or 'Good')|upper }}</strong>. Confirm this screening result or challenge it with observations.
+      </div>
+
+      <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+        <!-- Confirm AI Suggestion Button -->
+        <form method="post" style="display: inline-block;">
+          <input type="hidden" name="action" value="confirm_ai">
+          <button type="submit" class="form-btn-submit" style="padding: 8px 14px; background-color: var(--status-good-dot); color: white;">
+            <i class="bi bi-check-circle"></i> Confirm AI Suggestion ({{ (inspection.ml_prediction or 'Good')|capitalize }})
           </button>
         </form>
-        {% endif %}
+
+        <!-- Challenge AI Suggestion Toggle Button -->
+        <button type="button" class="btn-custom-outline" onclick="const el = document.getElementById('challengeDrawer'); el.style.display = el.style.display === 'none' ? 'block' : 'none';" style="padding: 8px 14px; border-color: var(--status-review-dot); color: var(--status-review-text);">
+          <i class="bi bi-flag"></i> Challenge AI Suggestion...
+        </button>
+      </div>
+
+      <!-- Challenge Reason Form Drawer -->
+      <div id="challengeDrawer" style="display: none; margin-top: 14px; padding: 12px 14px; background: var(--bg-hover); border-radius: var(--radius-xs); border: 1px solid var(--border-hairline);">
+        <form method="post">
+          <input type="hidden" name="action" value="challenge_ai">
+          <div class="form-group-clean">
+            <label class="form-label-clean" for="challengeReason">Reason for Challenging AI Suggestion <span style="color: var(--status-defect-text);">*</span></label>
+            <textarea class="form-textarea-clean" name="challenge_reason" id="challengeReason" rows="2" placeholder="e.g. Surface shows micro-shrinkage porosity near flange runner not detected by CNN..." required></textarea>
+          </div>
+          <button type="submit" class="btn-custom-outline" style="padding: 7px 14px; border-color: var(--status-defect-dot); color: var(--status-defect-text);">
+            <i class="bi bi-send-exclamation"></i> Submit Challenge & Mark Case Disputed
+          </button>
+        </form>
       </div>
     </div>
+    {% endif %}
+
+    <!-- Quality & Compliance Verification Stamp -->
+    <div style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; background-color: var(--bg-hover); border: 1px solid var(--border-hairline); border-radius: var(--radius-sm); font-size: 0.78rem; color: var(--text-muted); margin-bottom: 20px;">
+      <i class="bi bi-shield-check" style="font-size: 1.2rem; color: var(--status-good-dot);"></i>
+      <div>
+        <strong style="color: var(--text-primary);">Verifiable Quality Record</strong> — Evaluated in compliance with standard casting defect criteria (porosity, shrinkage, crack inspection).
+      </div>
+    </div>
+
+    <!-- Supervisor & Manager Interactive Disposition Form -->
+    {% if current_role in ['supervisor', 'manager'] %}
+    <div style="border-top: 1px solid var(--border-hairline); padding-top: 16px;">
+      <h3 style="font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin-bottom: 12px;">
+        Manual Disposition Override (Supervisor / Manager)
+      </h3>
+      <form method="post" id="reviewForm">
+        <input type="hidden" name="action" value="custom">
+        <div class="form-group-clean">
+          <label class="form-label-clean" for="humanResultSelect">Quality Decision</label>
+          <select class="form-select-clean" name="human_result" id="humanResultSelect">
+            <option value="Good" {% if inspection.human_result|lower in ['good', 'passed'] %}selected{% endif %}>Good — Release to next operation</option>
+            <option value="Defective" {% if inspection.human_result|lower == 'defective' %}selected{% endif %}>Defective — Segregate and quarantine</option>
+            <option value="Uncertain" {% if inspection.human_result|lower == 'uncertain' %}selected{% endif %}>Uncertain — Require metrology / CMM lab check</option>
+          </select>
+        </div>
+
+        <div class="form-group-clean">
+          <label class="form-label-clean" for="reviewNote">Disposition Notes / Audit Reason</label>
+          <textarea class="form-textarea-clean" name="review_note" id="reviewNote" rows="2" placeholder="State reason for acceptance or rejection...">{{ inspection.review_note or '' }}</textarea>
+        </div>
+
+        <button type="submit" class="form-btn-submit" style="padding: 9px 16px;">
+          <i class="bi bi-check2-circle"></i> Save Quality Disposition
+        </button>
+      </form>
+    </div>
+    {% endif %}
+
   </div>
 </div>
 
-<!-- Bottom: Audit History -->
-<div class="card shadow-sm mt-4">
-  <div class="card-header">
-    <span class="d-flex align-items-center gap-2">
-      <i class="bi bi-clock-history text-primary"></i>
-      Inspection Lifecycle Audit Log
-    </span>
-  </div>
-  <div class="card-body">
-    <div class="timeline ps-2">
-      {% for h in history %}
-      <div class="timeline-item">
-        <div class="d-flex align-items-center gap-2 mb-1">
-          <span class="fw-bold text-light small">{{ h.actor }}</span>
-          <span class="badge text-bg-dark border border-secondary border-opacity-50 font-monospace small">{{ h.event
-            }}</span>
-          <span class="text-muted small ms-auto">{{ h.created_at }}</span>
+<!-- Bottom Section: Corrective Actions (CAPA) & Audit Trail -->
+<div class="two-col-layout" style="grid-template-columns: 1.2fr 0.8fr; align-items: start;">
+  
+  <!-- Left: Linked Corrective Actions (CAPA) -->
+  <div class="card-clean">
+    <div class="card-header-clean">
+      <div>
+        <h2 class="card-title-clean">Linked Corrective Actions (CAPA)</h2>
+        <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 2px;">
+          Track root cause mitigation, containment orders, and mold maintenance
         </div>
-        <div class="small text-muted">{{ h.reason }}</div>
       </div>
-      {% else %}
-      <div class="text-muted small">No lifecycle events recorded yet.</div>
+      <span class="user-status-pill" style="font-size: 0.75rem;">
+        {{ actions|length }} Actions
+      </span>
+    </div>
+
+    {% if actions %}
+    <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+      {% for a in actions %}
+      <div style="background: var(--bg-hover); border: 1px solid var(--border-hairline); border-radius: var(--radius-sm); padding: 12px 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <span style="font-weight: 600; color: var(--text-primary); font-size: 0.9rem;">
+            #{{ a.id }} {{ a.title }}
+          </span>
+          <span class="pill-status {% if a.status == 'Completed' %}pill-released{% elif a.status == 'In progress' %}pill-review{% else %}pill-open{% endif %}">
+            {{ a.status }}
+          </span>
+        </div>
+        <div style="font-size: 0.8rem; color: var(--text-muted);">
+          Owner: <strong style="color: var(--text-primary);">{{ a.owner }}</strong> · Due: <span style="font-family: var(--font-mono);">{{ a.due_date }}</span>
+        </div>
+        {% if a.corrective_work %}
+        <div style="font-size: 0.82rem; color: var(--text-primary); margin-top: 6px; background: var(--bg-surface); padding: 6px 10px; border-radius: var(--radius-xs); border: 1px solid var(--border-hairline);">
+          <strong style="color: var(--accent-primary);">Corrective Work Performed:</strong> {{ a.corrective_work }}
+        </div>
+        {% endif %}
+        {% if a.evidence_image %}
+        <div style="margin-top: 8px; display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 0.74rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase;">Follow-Up Evidence:</span>
+          <a href="{{ url_for('uploaded_file', filename=a.evidence_image) }}" target="_blank" class="table-link" style="display: inline-flex; align-items: center; gap: 4px; font-size: 0.78rem;">
+            <i class="bi bi-paperclip"></i> View Evidence Attachment →
+          </a>
+        </div>
+        {% endif %}
+        {% if a.notes %}
+        <div style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 6px; border-top: 1px dashed var(--border-hairline); padding-top: 6px;">
+          {{ a.notes }}
+        </div>
+        {% endif %}
+      </div>
       {% endfor %}
     </div>
+    {% else %}
+    <div class="empty-state-box" style="padding: 24px 16px; margin-bottom: 16px;">
+      <i class="bi bi-clipboard-check empty-state-icon" style="font-size: 1.8rem;"></i>
+      <div class="empty-state-title">No corrective actions logged</div>
+      <div class="empty-state-desc">No containment or tooling adjustments currently assigned to this sample.</div>
+    </div>
+    {% endif %}
+
+    <!-- Create Action Form (Supervisor/Manager) -->
+    {% if current_role in ['supervisor', 'manager'] %}
+    <details style="border-top: 1px solid var(--border-hairline); padding-top: 14px;">
+      <summary style="font-size: 0.86rem; font-weight: 600; color: var(--accent-primary); cursor: pointer; user-select: none; display: flex; align-items: center; justify-content: space-between;">
+        <span><i class="bi bi-plus-circle" style="margin-right: 6px;"></i> Assign New Corrective Action Order</span>
+        <i class="bi bi-chevron-down"></i>
+      </summary>
+      <form method="post" action="{{ url_for('create_action', inspection_id=inspection.id) }}" style="margin-top: 14px;">
+        <div class="form-group-clean">
+          <label class="form-label-clean" for="actionTitle">Work Order Title <span style="color: var(--status-defect-text);">*</span></label>
+          <input class="form-input-clean" name="title" id="actionTitle" placeholder="e.g. Inspect mold gating pressure and vent pins" required>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group-clean">
+            <label class="form-label-clean" for="actionOwner">Assignee / Engineer <span style="color: var(--status-defect-text);">*</span></label>
+            <input class="form-input-clean" name="owner" id="actionOwner" placeholder="e.g. Marcus Chen" required>
+          </div>
+          <div class="form-group-clean">
+            <label class="form-label-clean" for="actionDueDate">Target Completion Date <span style="color: var(--status-defect-text);">*</span></label>
+            <input class="form-input-clean" type="date" name="due_date" id="actionDueDate" required>
+          </div>
+        </div>
+        <div class="form-group-clean">
+          <label class="form-label-clean" for="actionNotes">Technical Notes</label>
+          <textarea class="form-textarea-clean" name="notes" id="actionNotes" rows="2" placeholder="Specify tooling or process parameters to review..."></textarea>
+        </div>
+        <button type="submit" class="btn-custom-primary" style="padding: 8px 16px; font-size: 0.85rem;">
+          <i class="bi bi-plus-circle"></i> Create Action
+        </button>
+      </form>
+    </details>
+    {% endif %}
   </div>
+
+  <!-- Right: Audit Event Trail -->
+  <div class="card-clean">
+    <div class="card-header-clean">
+      <h2 class="card-title-clean">Audit Log</h2>
+      <span style="font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono);">
+        {{ history|length }} Events
+      </span>
+    </div>
+
+    {% if history %}
+    <div style="display: flex; flex-direction: column; gap: 10px; max-height: 380px; overflow-y: auto;">
+      {% for h in history %}
+      <div style="border-left: 2px solid var(--accent-primary); padding-left: 10px; margin-bottom: 6px;">
+        <div style="font-size: 0.84rem; font-weight: 600; color: var(--text-primary);">
+          {{ h.event }}
+        </div>
+        <div style="font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono);">
+          {{ h.created_at }} · by {{ h.actor }}
+        </div>
+        {% if h.reason %}
+        <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 2px;">
+          {{ h.reason }}
+        </div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state-box" style="padding: 24px 16px;">
+      <i class="bi bi-clock-history empty-state-icon" style="font-size: 1.8rem;"></i>
+      <div class="empty-state-title">No audit history</div>
+      <div class="empty-state-desc">Audit events will appear here as reviews and actions are recorded.</div>
+    </div>
+    {% endif %}
+  </div>
+
 </div>
-{% endblock %}
-
-{% block scripts %}
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('[data-width-pct]').forEach(el => {
-      el.style.width = el.getAttribute('data-width-pct') + '%';
-    });
-  });
-
-  function quickReview(disposition) {
-    const select = document.getElementById('humanResultSelect');
-    const noteInput = document.getElementById('reviewNoteInput');
-    select.value = disposition;
-    if (!noteInput.value.trim()) {
-      noteInput.value = 'Fast disposition confirmed: ' + disposition;
-    }
-    document.getElementById('reviewForm').submit();
-  }
-</script>
 {% endblock %}

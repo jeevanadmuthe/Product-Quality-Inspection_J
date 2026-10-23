@@ -2,58 +2,93 @@
 {% block title %}Audit History · QualityTrack{% endblock %}
 
 {% block content %}
-<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+<!-- Page Header -->
+<div class="page-header-row">
   <div>
-    <h1 class="h3 fw-bold mb-1">System Audit & Compliance Log</h1>
-    <p class="text-muted mb-0">Immutable record of all quality dispositions, batch decisions, and user actions.</p>
+    <h1 class="page-title">System Audit & Compliance Log</h1>
+    <p class="page-subtitle">Immutable chronological log of quality dispositions, batch authorizations, and user actions.</p>
+  </div>
+  <div class="header-actions">
+    <span class="user-status-pill">
+      <span>Logged Events: <strong>{{ history|length }}</strong></span>
+    </span>
   </div>
 </div>
 
-<div class="card shadow-sm">
-  <div class="card-header">
-    <span class="d-flex align-items-center gap-2">
-      <i class="bi bi-shield-lock text-primary"></i>
-      Event Audit Trail
-    </span>
-    <span class="badge text-bg-secondary">{{ history|length }} Events Logged</span>
+<div class="card-clean">
+  <div class="card-header-clean">
+    <div>
+      <h2 class="card-title-clean">Event Audit Trail</h2>
+      <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 2px;">
+        Traceable records for regulatory compliance and internal quality assurance
+      </div>
+    </div>
   </div>
-  <div class="table-responsive">
-    <table class="table table-custom">
+
+  {% if history %}
+  <div style="overflow-x: auto;">
+    <table class="table-clean">
       <thead>
         <tr>
-          <th>Timestamp</th>
-          <th>Actor</th>
-          <th>Event Description</th>
-          <th>Entity Reference</th>
-          <th>Reason & Details</th>
+          <th style="width: 18%;">TIMESTAMP</th>
+          <th style="width: 14%;">OPERATOR</th>
+          <th style="width: 24%;">ACTION EVENT</th>
+          <th style="width: 16%;">ENTITY REFERENCE</th>
+          <th style="width: 28%;">REASON & AUDIT NOTES</th>
         </tr>
       </thead>
       <tbody>
         {% for h in history %}
         <tr>
-          <td class="font-monospace small text-muted">{{ h.created_at }}</td>
+          <td style="color: var(--text-muted); font-size: 0.8rem; font-family: var(--font-mono);">
+            {{ h.created_at }}
+          </td>
           <td>
-            <span class="badge text-bg-dark border border-secondary border-opacity-50">
-              <i class="bi bi-person-fill me-1 text-primary"></i>{{ h.actor }}
+            <span class="user-status-pill" style="font-size: 0.76rem; padding: 2px 8px;">
+              {{ h.actor }}
             </span>
           </td>
-          <td class="fw-semibold text-light">{{ h.event }}</td>
           <td>
-            <span class="badge bg-secondary bg-opacity-25 text-light font-monospace">
+            <div style="display: flex; align-items: center; gap: 7px;">
+              {% if 'login' in h.event|lower %}
+                <i class="bi bi-box-arrow-in-right icon-muted" style="font-size: 0.95rem;"></i>
+              {% elif 'product' in h.event|lower %}
+                <i class="bi bi-diagram-3 icon-accent" style="font-size: 0.95rem;"></i>
+              {% elif 'batch' in h.event|lower %}
+                <i class="bi bi-boxes icon-accent" style="font-size: 0.95rem;"></i>
+              {% elif 'defective' in h.event|lower %}
+                <i class="bi bi-exclamation-octagon-fill icon-defect" style="font-size: 0.95rem;"></i>
+              {% elif 'good' in h.event|lower or 'passed' in h.event|lower %}
+                <i class="bi bi-check-circle-fill icon-good" style="font-size: 0.95rem;"></i>
+              {% elif 'action' in h.event|lower %}
+                <i class="bi bi-wrench-adjustable icon-review" style="font-size: 0.95rem;"></i>
+              {% elif 'inspection' in h.event|lower %}
+                <i class="bi bi-camera-viewfinder icon-accent" style="font-size: 0.95rem;"></i>
+              {% else %}
+                <i class="bi bi-clock-history icon-muted" style="font-size: 0.95rem;"></i>
+              {% endif %}
+              <strong style="color: var(--text-primary); font-size: 0.86rem;">{{ h.event }}</strong>
+            </div>
+          </td>
+          <td>
+            <span style="background: var(--bg-hover); color: var(--text-primary); border: 1px solid var(--border-hairline); padding: 2px 8px; border-radius: var(--radius-xs); font-size: 0.78rem; font-family: var(--font-mono);">
               {{ h.record_type }} #{{ h.record_id }}
             </span>
           </td>
-          <td class="text-muted small">{{ h.reason or '—' }}</td>
-        </tr>
-        {% else %}
-        <tr>
-          <td colspan="5" class="text-center text-muted py-5">
-            No history recorded yet.
+          <td style="color: var(--text-secondary); font-size: 0.82rem;">
+            {{ h.reason or '—' }}
           </td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
+  {% else %}
+  <div class="empty-state-box">
+    <i class="bi bi-clock-history empty-state-icon"></i>
+    <div class="empty-state-title">No audit history recorded yet</div>
+    <div class="empty-state-desc">Actions will appear here as users log in, inspect parts, and update batch statuses.</div>
+  </div>
+  {% endif %}
 </div>
 {% endblock %}

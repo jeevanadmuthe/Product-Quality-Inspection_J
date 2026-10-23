@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Products · QualityTrack</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="style.css" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Top Navbar -->
+  <header class="navbar-clean">
+    <div style="max-width: 1220px; margin: 0 auto; padding: 0 20px; display: flex; align-items: center; justify-content: space-between;">
+      
+      <!-- Brand & Navigation -->
+      <div style="display: flex; align-items: center; gap: 32px;">
+        <a class="brand-title" href="dashboard.html">
+          <span class="brand-quality">Quality</span><span class="brand-track">Track</span>
+        </a>
+
+        <nav>
+          <ul class="nav-tabs-clean">
+            <li class="nav-item">
+              <a class="nav-link" href="dashboard.html">Dashboard</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" href="products.html">Products</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="batches.html">Batches</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="inspections.html">Inspections</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">Actions</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">Reports</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">Audit History</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+
+      <!-- Right User Pill -->
+      <div class="user-status-pill">
+        <span class="user-status-dot"></span> Demo user · Manager
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Main Content Wrapper -->
+  <main class="main-wrapper">
+    <!-- Page Header -->
+    <div class="page-header-row">
+      <div>
+        <h1 class="page-title">Product Specifications</h1>
+        <p class="page-subtitle">Manage manufactured parts, materials, and quality standards.</p>
+      </div>
+    </div>
+
+    <div class="two-col-layout">
+      <!-- Left Column: Register Product -->
+      <div class="card-clean">
+        <h2 class="card-title-clean" style="margin-bottom: 20px;">Register product</h2>
+        
+        <form>
+          <div class="form-group-clean">
+            <label class="form-label-clean">Product name</label>
+            <input class="form-input-clean" placeholder="e.g. Turbine Impeller Flange">
+          </div>
+
+          <div class="form-group-clean" style="margin-bottom: 24px;">
+            <label class="form-label-clean">Category / material standard</label>
+            <input class="form-input-clean" value="Metal casting">
+          </div>
+
+          <button type="button" class="form-btn-submit">
+            Create product
+          </button>
+        </form>
+      </div>
+
+      <!-- Right Column: Product Registry -->
+      <div class="card-clean">
+        <div class="card-header-clean">
+          <h2 class="card-title-clean">Product registry</h2>
+        </div>
+
+        <div style="overflow-x: auto;">
+          <table class="table-clean">
+            <thead>
+              <tr>
+                <th style="width: 12%;">ID</th>
+                <th style="width: 32%;">PRODUCT NAME</th>
+                <th style="width: 24%;">CATEGORY</th>
+                <th style="width: 16%;">ACTIVE BATCHES</th>
+                <th style="width: 16%;">REGISTERED</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="color: #64748b; font-weight: 500;">#12</td>
+                <td style="font-weight: 500; color: #1e293b;">Turbine Impeller Flange</td>
+                <td style="color: #475569;">Metal casting</td>
+                <td style="color: #475569;">4</td>
+                <td style="color: #475569;">2026-10-15</td>
+              </tr>
+              <tr>
+                <td style="color: #64748b; font-weight: 500;">#11</td>
+                <td style="font-weight: 500; color: #1e293b;">Valve Housing</td>
+                <td style="color: #475569;">Steel casting</td>
+                <td style="color: #475569;">3</td>
+                <td style="color: #475569;">2026-10-12</td>
+              </tr>
+              <tr>
+                <td style="color: #64748b; font-weight: 500;">#10</td>
+                <td style="font-weight: 500; color: #1e293b;">Pump Casing</td>
+                <td style="color: #475569;">Iron casting</td>
+                <td style="color: #475569;">2</td>
+                <td style="color: #475569;">2026-10-09</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Clean Footer -->
+  <footer class="footer-clean">
+    QualityTrack · Industrial Visual Quality Inspection · Standalone demo interface
+  </footer>
+
+</body>
+</html>

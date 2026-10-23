@@ -2,17 +2,24 @@
 {% block title %}Error {{ code }} · QualityTrack{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center py-5">
-  <div class="col-md-6 text-center">
-    <div class="p-4 p-sm-5 rounded-4 card border-0 shadow-lg">
-      <div class="display-1 fw-bold text-danger mb-2 font-monospace">{{ code }}</div>
-      <h2 class="h4 fw-bold mb-3 text-light">{{ message }}</h2>
-      <p class="text-muted mb-4">Please verify your user permissions or return to the main quality operations dashboard.</p>
-      <div>
-        <a class="btn btn-primary px-4" href="{{ url_for('index') }}">
-          <i class="bi bi-house me-1"></i> Return to Dashboard
-        </a>
-      </div>
+<div style="max-width: 480px; margin: 60px auto; text-align: center;">
+  <div class="card-clean" style="padding: 40px 28px;">
+    <div style="font-size: 3rem; font-weight: 800; color: var(--status-defect-dot); font-family: var(--font-mono); margin-bottom: 8px;">
+      {{ code }}
+    </div>
+    <h1 style="font-size: 1.2rem; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">
+      {{ message }}
+    </h1>
+    <p style="font-size: 0.86rem; color: var(--text-muted); margin-bottom: 24px; line-height: 1.5;">
+      The requested quality record could not be processed or found. Verify the record ID or return to the main dashboard.
+    </p>
+    <div style="display: flex; gap: 12px; justify-content: center;">
+      <a class="btn-custom-outline" href="javascript:history.back()">
+        <i class="bi bi-arrow-left"></i> Go Back
+      </a>
+      <a class="btn-custom-primary" href="{{ url_for('index') }}">
+        <i class="bi bi-grid-1x2"></i> Dashboard
+      </a>
     </div>
   </div>
 </div>

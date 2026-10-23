@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Batches · QualityTrack</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="style.css" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Top Navbar -->
+  <header class="navbar-clean">
+    <div style="max-width: 1220px; margin: 0 auto; padding: 0 20px; display: flex; align-items: center; justify-content: space-between;">
+      
+      <!-- Brand & Navigation -->
+      <div style="display: flex; align-items: center; gap: 32px;">
+        <a class="brand-title" href="dashboard.html">
+          <span class="brand-quality">Quality</span><span class="brand-track">Track</span>
+        </a>
+
+        <nav>
+          <ul class="nav-tabs-clean">
+            <li class="nav-item">
+              <a class="nav-link" href="dashboard.html">Dashboard</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="products.html">Products</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" href="batches.html">Batches</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="inspections.html">Inspections</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">Actions</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">Reports</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">Audit History</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+
+      <!-- Right User Pill -->
+      <div class="user-status-pill">
+        <span class="user-status-dot"></span> Demo user · Manager
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Main Content Wrapper -->
+  <main class="main-wrapper">
+    <!-- Page Header -->
+    <div class="page-header-row">
+      <div>
+        <h1 class="page-title">Production Batches</h1>
+        <p class="page-subtitle">Register lots, assign samples, and review release or hold decisions.</p>
+      </div>
+    </div>
+
+    <div class="two-col-layout">
+      <!-- Left Column: Register Production Batch -->
+      <div class="card-clean">
+        <h2 class="card-title-clean" style="margin-bottom: 20px;">Register production batch</h2>
+        
+        <form>
+          <div class="form-group-clean">
+            <label class="form-label-clean">Batch code / lot number</label>
+            <input class="form-input-clean" placeholder="e.g. B-106">
+          </div>
+
+          <div class="form-group-clean">
+            <label class="form-label-clean">Product specification</label>
+            <select class="form-select-clean">
+              <option selected>Turbine Impeller Flange</option>
+              <option>Valve Housing</option>
+              <option>Pump Casing</option>
+            </select>
+          </div>
+
+          <div class="form-group-clean">
+            <label class="form-label-clean">Lot quantity</label>
+            <input class="form-input-clean" type="number" value="50">
+          </div>
+
+          <div class="form-group-clean" style="margin-bottom: 24px;">
+            <label class="form-label-clean">Production date</label>
+            <input class="form-input-clean" type="date" value="2026-10-18">
+          </div>
+
+          <button type="button" class="form-btn-submit">
+            Create batch
+          </button>
+        </form>
+      </div>
+
+      <!-- Right Column: Active Batch Inventory -->
+      <div class="card-clean">
+        <div class="card-header-clean">
+          <h2 class="card-title-clean">Active batch inventory</h2>
+        </div>
+
+        <div style="overflow-x: auto;">
+          <table class="table-clean">
+            <thead>
+              <tr>
+                <th style="width: 15%;">BATCH</th>
+                <th style="width: 35%;">PRODUCT</th>
+                <th style="width: 18%;">QUANTITY</th>
+                <th style="width: 18%;">INSPECTIONS</th>
+                <th style="width: 14%;">DISPOSITION</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="font-weight: 500; color: #1e293b;">B-105</td>
+                <td style="color: #475569;">Turbine Impeller Flange</td>
+                <td style="color: #475569;">120 units</td>
+                <td style="color: #475569;">18 inspected</td>
+                <td>
+                  <span class="pill-status pill-open">Open</span>
+                </td>
+              </tr>
+              <tr>
+                <td style="font-weight: 500; color: #1e293b;">B-104</td>
+                <td style="color: #475569;">Valve Housing</td>
+                <td style="color: #475569;">80 units</td>
+                <td style="color: #475569;">22 inspected</td>
+                <td>
+                  <span class="pill-status pill-released">Released</span>
+                </td>
+              </tr>
+              <tr>
+                <td style="font-weight: 500; color: #1e293b;">B-103</td>
+                <td style="color: #475569;">Pump Casing</td>
+                <td style="color: #475569;">60 units</td>
+                <td style="color: #475569;">12 inspected</td>
+                <td>
+                  <span class="pill-status pill-hold">On hold</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Clean Footer -->
+  <footer class="footer-clean">
+    QualityTrack · Industrial Visual Quality Inspection · Standalone demo interface
+  </footer>
+
+</body>
+</html>

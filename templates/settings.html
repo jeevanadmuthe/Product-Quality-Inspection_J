@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+{% block title %}Quality Trends & Settings · QualityTrack{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="page-header-row">
+  <div>
+    <h1 class="page-title">Quality Governance Trends & Settings</h1>
+    <p class="page-subtitle">Plant Quality Manager control panel: review defect trends, AI agreement metrics, and configure ISO 9001 quality thresholds.</p>
+  </div>
+  <div class="header-actions">
+    <span class="user-status-pill" style="background: rgba(37, 99, 235, 0.1); border-color: rgba(37, 99, 235, 0.3);">
+      <i class="bi bi-shield-lock-fill" style="color: var(--accent-primary);"></i>
+      <span>Plant Quality Manager Access</span>
+    </span>
+  </div>
+</div>
+
+<!-- Telemetry Ribbon: Trends & Governance KPIs -->
+<section class="telemetry-strip" aria-label="Quality Manager Governance KPIs">
+  <div class="telemetry-item">
+    <div class="telemetry-label">
+      <i class="bi bi-graph-up-arrow"></i> AI Agreement Rate
+    </div>
+    <div class="telemetry-value" style="color: var(--status-good-text);">
+      {{ '%.1f'|format(trends.agreement_rate) }}%
+    </div>
+    <div class="telemetry-sub">AI vs Human disposition concordance</div>
+  </div>
+
+  <a href="{{ url_for('inspections', status='disputed') }}" class="telemetry-item is-clickable" data-tooltip="Inspect pending disputed cases">
+    <div class="telemetry-label">
+      <i class="bi bi-flag-fill"></i> Active Disputed Cases
+    </div>
+    <div class="telemetry-value" style="color: {% if trends.disputed_count > 0 %}var(--status-defect-dot){% else %}var(--text-primary){% endif %};">
+      {{ trends.disputed_count }}
+    </div>
+    <div class="telemetry-sub">{% if trends.disputed_count > 0 %}Awaiting manager resolution{% else %}Zero unresolved disputes{% endif %}</div>
+  </a>
+
+  <div class="telemetry-item">
+    <div class="telemetry-label">
+      <i class="bi bi-check-all"></i> Resolved by Manager
+    </div>
+    <div class="telemetry-value" style="color: var(--accent-primary);">
+      {{ trends.resolved_count }}
+    </div>
+    <div class="telemetry-sub">Disputes settled by Quality Manager</div>
+  </div>
+
+  <div class="telemetry-item">
+    <div class="telemetry-label">
+      <i class="bi bi-shield-check"></i> Total Evaluated
+    </div>
+    <div class="telemetry-value">
+      {{ trends.total_evaluated }}
+    </div>
+    <div class="telemetry-sub">Samples with confirmed disposition</div>
+  </div>
+</section>
+
+<!-- Two-Column Operational Layout -->
+<div class="two-col-layout" style="grid-template-columns: 1.3fr 1fr; align-items: start;">
+
+  <!-- Left Column: Production Lot Yield Trends & Governance Audit History -->
+  <div style="display: flex; flex-direction: column; gap: 24px;">
+
+    <!-- Lot Yield Trends -->
+    <div class="card-clean">
+      <div class="card-header-clean">
+        <div>
+          <h2 class="card-title-clean">Batch Quality Yield Trends</h2>
+          <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 2px;">
+            Defect frequency by active production lots (ISO 9001 compliance audit)
+          </div>
+        </div>
+        <a href="{{ url_for('batches') }}" class="table-link" style="font-size: 0.8rem;">
+          All Batches →
+        </a>
+      </div>
+
+      {% if trends.batch_yields %}
+      <div style="overflow-x: auto;">
+        <table class="table-clean">
+          <thead>
+            <tr>
+              <th style="width: 25%;">BATCH LOT</th>
+              <th style="width: 35%;">PRODUCT SPEC</th>
+              <th style="width: 20%; text-align: center;">INSPECTED</th>
+              <th style="width: 20%; text-align: right;">DEFECT RATE</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for b in trends.batch_yields %}
+            {% set def_pct = ((b.defects / b.total_inspected) * 100) if b.total_inspected > 0 else 0 %}
+            <tr>
+              <td>
+                <span class="code-ref" style="font-weight: 600;">{{ b.batch_code }}</span>
+              </td>
+              <td>
+                <span style="font-size: 0.84rem; color: var(--text-primary); font-weight: 500;">{{ b.product_name }}</span>
+              </td>
+              <td style="text-align: center; font-family: var(--font-mono); font-size: 0.84rem;">
+                {{ b.total_inspected }}
+              </td>
+              <td style="text-align: right;">
+                <span style="font-family: var(--font-mono); font-weight: 600; color: {% if def_pct > 5 %}var(--status-defect-dot){% elif def_pct > 0 %}var(--status-review-dot){% else %}var(--status-good-dot){% endif %}; font-size: 0.84rem;">
+                  {{ '%.1f'|format(def_pct) }}%
+                </span>
+                <span style="font-size: 0.74rem; color: var(--text-muted); display: block;">
+                  ({{ b.defects or 0 }} defects)
+                </span>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="empty-state-box">
+        <i class="bi bi-bar-chart empty-state-icon"></i>
+        <div class="empty-state-title">No batch yield telemetry available</div>
+        <div class="empty-state-desc">Batch defect statistics will compile automatically as samples are inspected.</div>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Recent Governance & Decision History -->
+    <div class="card-clean">
+      <div class="card-header-clean">
+        <div>
+          <h2 class="card-title-clean">Quality Governance Audit Trail</h2>
+          <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 2px;">
+            Recent manager dispositions, batch decisions, and threshold updates
+          </div>
+        </div>
+        <a href="{{ url_for('history') }}" class="table-link" style="font-size: 0.8rem;">
+          Full Log →
+        </a>
+      </div>
+
+      {% if trends.recent_governance_logs %}
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        {% for h in trends.recent_governance_logs %}
+        <div style="border-left: 2px solid var(--accent-primary); padding-left: 10px; font-size: 0.82rem;">
+          <div style="display: flex; justify-content: space-between; align-items: baseline;">
+            <strong style="color: var(--text-primary);">{{ h.event }}</strong>
+            <span style="font-size: 0.72rem; color: var(--text-muted); font-family: var(--font-mono);">{{ h.created_at }}</span>
+          </div>
+          <div style="color: var(--text-secondary); margin-top: 2px;">
+            Actor: <strong>{{ h.actor }}</strong> · Scope: {{ h.record_type }} #{{ h.record_id }}
+          </div>
+          {% if h.reason %}
+          <div style="color: var(--text-muted); font-size: 0.76rem; margin-top: 2px; font-style: italic;">
+            "{{ h.reason }}"
+          </div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state-box">
+        <div class="empty-state-desc">No recent governance events recorded.</div>
+      </div>
+      {% endif %}
+    </div>
+
+  </div>
+
+  <!-- Right Column: Settings & Quality Threshold Configuration -->
+  <div class="card-clean">
+    <div class="card-header-clean">
+      <div>
+        <h2 class="card-title-clean">Inspection Standards & Settings</h2>
+        <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 2px;">
+          Persist binding inspection rules & automated dispute thresholds
+        </div>
+      </div>
+      <span class="user-role-tag" style="background: var(--accent-primary); color: white;">
+        Manager Authority
+      </span>
+    </div>
+
+    <form method="post" action="{{ url_for('settings_view') }}" id="settingsForm">
+      
+      <!-- AI Confidence Threshold -->
+      <div class="form-group-clean">
+        <label class="form-label-clean" for="aiConfidence">
+          AI Acceptance Confidence Threshold
+        </label>
+        <select class="form-select-clean" name="ai_confidence_threshold" id="aiConfidence">
+          <option value="0.95" {% if settings.ai_confidence_threshold == '0.95' %}selected{% endif %}>0.95 (Ultra-Strict — 95%+ Confidence Required)</option>
+          <option value="0.90" {% if settings.ai_confidence_threshold == '0.90' %}selected{% endif %}>0.90 (High Precision — 90% Confidence)</option>
+          <option value="0.85" {% if settings.ai_confidence_threshold == '0.85' %}selected{% endif %}>0.85 (Recommended Default — 85% Confidence)</option>
+          <option value="0.80" {% if settings.ai_confidence_threshold == '0.80' %}selected{% endif %}>0.80 (Balanced Screening — 80% Confidence)</option>
+          <option value="0.75" {% if settings.ai_confidence_threshold == '0.75' %}selected{% endif %}>0.75 (High Sensitivity — 75% Confidence)</option>
+        </select>
+        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">
+          Predictions below this threshold automatically flag for secondary human review.
+        </div>
+      </div>
+
+      <!-- Dispute Sensitivity -->
+      <div class="form-group-clean">
+        <label class="form-label-clean" for="disputeSensitivity">
+          Dispute & Ambiguity Sensitivity Trigger
+        </label>
+        <select class="form-select-clean" name="dispute_sensitivity" id="disputeSensitivity">
+          <option value="High (Auto-flag if ML score 0.35 - 0.70)" {% if 'High' in settings.dispute_sensitivity %}selected{% endif %}>High (Flag if ML score between 0.35 and 0.70)</option>
+          <option value="Medium (Auto-flag if ML score 0.40 - 0.65)" {% if 'Medium' in settings.dispute_sensitivity %}selected{% endif %}>Medium (Flag if ML score between 0.40 and 0.65)</option>
+          <option value="Standard (Auto-flag if ML score 0.45 - 0.55)" {% if 'Standard' in settings.dispute_sensitivity %}selected{% endif %}>Standard (Flag if ML score between 0.45 and 0.55)</option>
+        </select>
+      </div>
+
+      <!-- Auto Quarantine Defect Rate -->
+      <div class="form-group-clean">
+        <label class="form-label-clean" for="quarantineRate">
+          Lot Auto-Quarantine Defect Rate Threshold (%)
+        </label>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <input class="form-input-clean" type="number" step="0.5" min="1" max="50" name="auto_quarantine_defect_rate" id="quarantineRate" value="{{ settings.auto_quarantine_defect_rate }}" required style="width: 120px;">
+          <span style="font-size: 0.85rem; color: var(--text-secondary); font-family: var(--font-mono);">% of tested samples</span>
+        </div>
+        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">
+          Batches exceeding this defect rate trigger an immediate quality hold recommendation.
+        </div>
+      </div>
+
+      <!-- Target Compliance Standard -->
+      <div class="form-group-clean">
+        <label class="form-label-clean" for="qualityStandard">
+          Reference Metallurgy & Casting Standard
+        </label>
+        <select class="form-select-clean" name="quality_standard" id="qualityStandard">
+          <option value="ISO 9001:2015 / ASTM E155 Reference" {% if 'ASTM E155' in settings.quality_standard %}selected{% endif %}>ISO 9001:2015 / ASTM E155 (Casting Radiographic & Visual Standard)</option>
+          <option value="ISO 9001:2015 / DIN EN 1370" {% if 'DIN EN 1370' in settings.quality_standard %}selected{% endif %}>ISO 9001:2015 / DIN EN 1370 (Cast Iron Surface Roughness)</option>
+          <option value="ISO 9001:2015 / ASME Section IX" {% if 'ASME' in settings.quality_standard %}selected{% endif %}>ISO 9001:2015 / ASME Section IX (Pressure Vessel Casting Standard)</option>
+        </select>
+      </div>
+
+      <!-- CAPA Escalation Policy -->
+      <div class="form-group-clean" style="margin-bottom: 24px;">
+        <label class="form-label-clean" for="escalationPolicy">
+          Supervisor CAPA Escalation Policy
+        </label>
+        <select class="form-select-clean" name="escalation_policy" id="escalationPolicy">
+          <option value="Mandatory CAPA on Defective Castings" {% if 'Mandatory' in settings.escalation_policy %}selected{% endif %}>Mandatory Corrective Action on all Defective Castings</option>
+          <option value="Advisory CAPA with Supervisor Discretion" {% if 'Advisory' in settings.escalation_policy %}selected{% endif %}>Advisory Corrective Action with Supervisor Discretion</option>
+        </select>
+      </div>
+
+      <button type="submit" class="form-btn-submit" style="padding: 10px 18px; width: 100%; justify-content: center; background-color: var(--accent-primary); color: white;">
+        <i class="bi bi-save2"></i> Persist Quality Governance Settings
+      </button>
+
+    </form>
+  </div>
+
+</div>
+{% endblock %}
