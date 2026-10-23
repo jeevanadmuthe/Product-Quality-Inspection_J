@@ -33,19 +33,40 @@ from models.cnn_model import (
 )
 
 BASE_DIR = Path(__file__).resolve().parent
-DB_PATH = BASE_DIR / "quality.db"
-UPLOAD_DIR = BASE_DIR / "uploads"
+
+# Serverless environment detection (Vercel, AWS Lambda)
+IS_SERVERLESS = bool(os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME"))
+
+if IS_SERVERLESS:
+    # On Vercel / serverless runtime, only /tmp is writable
+    DATA_DIR = Path("/tmp")
+    DB_PATH = DATA_DIR / "quality.db"
+    UPLOAD_DIR = DATA_DIR / "uploads"
+else:
+    DATA_DIR = BASE_DIR
+    DB_PATH = BASE_DIR / "quality.db"
+    UPLOAD_DIR = BASE_DIR / "uploads"
+
 USER_UPLOAD_DIR = UPLOAD_DIR / "user_images"
 AIML_UPLOAD_DIR = UPLOAD_DIR / "aiml"
-USER_UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
-AIML_UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+
+try:
+    USER_UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+    AIML_UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+except OSError:
+    pass
+
 CNN_MODEL_PATH = BASE_DIR / "models" / "casting_cnn.pt"
 CNN_MANIFEST_PATH = BASE_DIR / "models" / "casting_cnn.manifest.json"
 
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "webp"}
 MAX_UPLOAD_MB = 8
 
-app = Flask(__name__)
+app = Flask(
+    __name__,
+    template_folder=str(BASE_DIR / "templates"),
+    static_folder=str(BASE_DIR / "static"),
+)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-only-qualitytrack-secret-key-2026")
 app.config["MAX_CONTENT_LENGTH"] = MAX_UPLOAD_MB * 1024 * 1024
 
@@ -61,6 +82,15 @@ DEMO_USERS = {
 # ---------------------------------------------------------
 
 def connect():
+    if IS_SERVERLESS and not DB_PATH.exists():
+        source_db = BASE_DIR / "quality.db"
+        if source_db.is_file():
+            import shutil
+            try:
+                DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(source_db, DB_PATH)
+            except Exception:
+                pass
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
@@ -151,6 +181,15 @@ def init_db():
                 "INSERT INTO batches(batch_code,product_id,quantity,production_date,status,updated_at) VALUES(?,?,?,?,?,?)",
                 ("B-104", pid, 50, date.today().isoformat(), "Open", now),
             )
+
+        # In serverless or fresh databases, automatically populate rich demo dataset
+        if c.execute("SELECT COUNT(*) n FROM batches").fetchone()["n"] <= 1:
+            try:
+                from seed_demo_data import seed_with_connection
+                seed_with_connection(c)
+            except Exception as e:
+                app.logger.warning("Auto demo seed notice: %s", e)
+
 
 
 def get_settings():
@@ -778,7 +817,19 @@ def uploaded_file(filename):
     if aiml_file.is_file():
         return send_from_directory(AIML_UPLOAD_DIR, base_name)
 
+    # 4. Fallback: also check bundled uploads under BASE_DIR when running with /tmp
+    if UPLOAD_DIR != (BASE_DIR / "uploads"):
+        bundled_dir = BASE_DIR / "uploads"
+        bundled_direct = (bundled_dir / filename).resolve()
+        if bundled_direct.is_file() and str(bundled_direct).startswith(str(bundled_dir.resolve())):
+            return send_from_directory(bundled_dir, filename)
+        if (bundled_dir / "user_images" / base_name).is_file():
+            return send_from_directory(bundled_dir / "user_images", base_name)
+        if (bundled_dir / "aiml" / base_name).is_file():
+            return send_from_directory(bundled_dir / "aiml", base_name)
+
     abort(404)
+
 
 
 @app.route("/inspections/<int:inspection_id>", methods=["GET", "POST"])

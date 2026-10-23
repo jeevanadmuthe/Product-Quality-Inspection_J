@@ -1,11 +1,10 @@
 import sqlite3
 from datetime import datetime, date
 
-def seed():
-    conn = sqlite3.connect('quality.db')
+def seed_with_connection(conn):
     c = conn.cursor()
 
-    # Clear existing demo data to match screenshots cleanly
+    # Clear existing demo data
     c.execute("DELETE FROM actions")
     c.execute("DELETE FROM history")
     c.execute("DELETE FROM inspections")
@@ -21,13 +20,11 @@ def seed():
     c.executemany("INSERT INTO products (id, name, category, created_at, archived) VALUES (?, ?, ?, ?, ?)", products)
 
     # 2. Batches (Total 24 batches to match stat "24 PRODUCTION BATCHES")
-    # Primary visible batches: B-105, B-104, B-103
     batches = [
         (1, "B-105", 12, 120, "2026-10-15", "Open", None, "2026-10-15 10:00:00"),
         (2, "B-104", 11, 80, "2026-10-12", "Released", "Approved for assembly", "2026-10-12 14:30:00"),
         (3, "B-103", 10, 60, "2026-10-10", "Hold", "Surface porosity check required", "2026-10-10 09:15:00"),
     ]
-    # Add other 21 batches across the active product lines to reach 24 batches
     for i in range(4, 25):
         pid = 10 + (i % 3)
         code = f"B-{105 + i}"
@@ -36,29 +33,17 @@ def seed():
     c.executemany("INSERT INTO batches (id, batch_code, product_id, quantity, production_date, status, decision_note, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", batches)
 
     # 3. Inspections
-    # In screenshot 1:
-    # #104: B-105 · Turbine flange | SMP-042 | Good · 98.2% | Good
-    # #103: B-105 · Turbine flange | SMP-041 | Defective · 94.7% | Defective
-    # #102: B-104 · Valve housing | SMP-019 | Review needed | Pending
-    # In screenshot 5:
-    # #104: B-105 / SMP-012 | Good | Good | Reviewed
-    # Total Pending Reviews = 7
-    # Total Confirmed Defects = 3
-    # Total inspections for 96.4% pass rate: approx 83 inspections with 80 Good, 3 Defective (80 / 83 = 96.4%)!
-
     inspections = [
         (102, 2, "SMP-019", None, "Surface porosity check", "Item", "review", 0.65, "casting-cnn-deeplearning-v1", 14, "Pending", "", "Pending review", "Alex", "2026-10-16 11:20:00", None),
         (103, 1, "SMP-041", "user_images/sample_defective_rotor.jpeg", "Subsurface inclusion crack observed on flange", "Item", "defective", 0.9988, "casting-cnn-deeplearning-v1", 12, "Defective", "Confirmed defect on runner", "Reviewed", "Alex", "2026-10-16 14:10:00", "aiml/cam_sample_defective_rotor.jpeg"),
         (104, 1, "SMP-042", "user_images/sample_good_flange.jpeg", "Surface clean, smooth compliant finish", "Item", "good", 0.9814, "casting-cnn-deeplearning-v1", 11, "Good", "Passes dimensional and visual tolerance", "Reviewed", "Alex", "2026-10-17 09:30:00", "aiml/cam_sample_good_flange.jpeg"),
     ]
 
-    # Additional 6 pending reviews to make total pending = 7
     for p_id in range(95, 101):
         inspections.append(
             (p_id, 1, f"SMP-{p_id:03d}", None, "Visual screening in progress", "Item", "review", 0.70, "casting-cnn-deeplearning-v1", 15, "Pending", "", "Pending review", "Alex", "2026-10-15 16:00:00", None)
         )
 
-    # Additional 2 confirmed defects to make total defects = 3 (along with #103)
     inspections.append(
         (94, 3, "SMP-008", None, "Porous gate junction", "Item", "defective", 0.952, "casting-cnn-deeplearning-v1", 16, "Defective", "Confirmed blowhole", "Reviewed", "Alex", "2026-10-14 10:00:00", None)
     )
@@ -66,7 +51,6 @@ def seed():
         (93, 3, "SMP-009", None, "Cold lap defect on flange perimeter", "Item", "defective", 0.963, "casting-cnn-deeplearning-v1", 13, "Defective", "Cracked perimeter", "Reviewed", "Alex", "2026-10-14 11:30:00", None)
     )
 
-    # Remaining good inspections to achieve exactly 80 Good out of 83 resolved inspections = 96.4% pass rate!
     for g_id in range(14, 93):
         inspections.append(
             (g_id, 2, f"SMP-{g_id:03d}", None, "Normal uniform casting surface", "Item", "good", 0.975, "casting-cnn-deeplearning-v1", 12, "Good", "Verified compliant", "Reviewed", "Alex", "2026-10-13 09:00:00", None)
@@ -80,8 +64,7 @@ def seed():
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, inspections)
 
-
-    # 4. Corrective Actions (Total active actions = 5)
+    # 4. Corrective Actions
     actions = [
         (1, 103, "Recalibrate gating nozzle for batch B-105", "Marcus", "2026-10-25", "Temperature gradient check required", "In progress", "2026-10-16 15:00:00"),
         (2, 94, "Inspect mold sand moisture content", "Sarah", "2026-10-24", "Moisture test on sand batches", "Open", "2026-10-15 08:30:00"),
@@ -98,10 +81,16 @@ def seed():
         ("Marcus", "Created action #1", "action", 1, "Gating recalibration", "2026-10-16 15:00:00"),
     ]
     c.executemany("INSERT INTO history (actor, event, record_type, record_id, reason, created_at) VALUES (?, ?, ?, ?, ?, ?)", events)
-
     conn.commit()
+
+
+def seed(db_path='quality.db'):
+    conn = sqlite3.connect(db_path)
+    seed_with_connection(conn)
     conn.close()
     print("Database seeded successfully to match dashboard screenshot specifications!")
 
+
 if __name__ == '__main__':
     seed()
+
