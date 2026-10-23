@@ -83,15 +83,6 @@ DEMO_USERS = {
 # ---------------------------------------------------------
 
 def connect():
-    if IS_SERVERLESS and not DB_PATH.exists():
-        source_db = BASE_DIR / "quality.db"
-        if source_db.is_file():
-            import shutil
-            try:
-                DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-                shutil.copy2(source_db, DB_PATH)
-            except Exception:
-                pass
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
