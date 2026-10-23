@@ -21,7 +21,7 @@
 
 <!-- Compact Telemetry Ribbon (Real Data, Minimalist Grid) -->
 <section class="telemetry-strip" aria-label="Key Production Telemetry">
-  <a href="{{ url_for('batches') }}" class="telemetry-item is-clickable" data-tooltip="Manage active production lots">
+  <a href="{{ url_for('batches') }}" class="telemetry-item is-clickable" style="text-decoration: none;" data-tooltip="Manage active production lots">
     <div class="telemetry-label">
       <i class="bi bi-boxes"></i> Active Batches
     </div>
@@ -29,7 +29,7 @@
     <div class="telemetry-sub">{{ stats.products }} product specifications</div>
   </a>
 
-  <a href="{{ url_for('inspections') }}" class="telemetry-item is-clickable"
+  <a href="{{ url_for('inspections') }}" class="telemetry-item is-clickable" style="text-decoration: none;"
     data-tooltip="Browse all visual inspections">
     <div class="telemetry-label">
       <i class="bi bi-camera"></i> Inspections
@@ -38,7 +38,7 @@
     <div class="telemetry-sub">{{ total_evaluated }} evaluated to date</div>
   </a>
 
-  <a href="{{ url_for('report') }}" class="telemetry-item is-clickable" data-tooltip="View quality pass/fail analytics">
+  <a href="{{ url_for('report') }}" class="telemetry-item is-clickable" style="text-decoration: none;" data-tooltip="View quality pass/fail analytics">
     <div class="telemetry-label">
       <i class="bi bi-shield-check"></i> Quality Pass Rate
     </div>
@@ -51,7 +51,7 @@
     </div>
   </a>
 
-  <a href="{{ url_for('inspections', status='pending') }}" class="telemetry-item is-clickable"
+  <a href="{{ url_for('inspections', status='pending') }}" class="telemetry-item is-clickable" style="text-decoration: none;"
     data-tooltip="Filter inspections awaiting review">
     <div class="telemetry-label">
       <i class="bi bi-exclamation-triangle"></i> Pending Review
@@ -63,7 +63,7 @@
     <div class="telemetry-sub">Awaiting inspector verification</div>
   </a>
 
-  <a href="{{ url_for('actions') }}" class="telemetry-item is-clickable" data-tooltip="Track corrective work orders">
+  <a href="{{ url_for('actions') }}" class="telemetry-item is-clickable" style="text-decoration: none;" data-tooltip="Track corrective work orders">
     <div class="telemetry-label">
       <i class="bi bi-wrench-adjustable"></i> Active CAPA
     </div>
@@ -74,7 +74,7 @@
     <div class="telemetry-sub">Mitigation actions assigned</div>
   </a>
 
-  <a href="{{ url_for('inspections', status='disputed') }}" class="telemetry-item is-clickable"
+  <a href="{{ url_for('inspections', status='disputed') }}" class="telemetry-item is-clickable" style="text-decoration: none;"
     data-tooltip="Disputed cases awaiting Quality Manager resolution">
     <div class="telemetry-label">
       <i class="bi bi-flag"></i> Disputed Cases

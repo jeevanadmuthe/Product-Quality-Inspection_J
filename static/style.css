@@ -108,6 +108,16 @@ body {
   overflow-x: hidden;
 }
 
+/* Baseline Anchor Styling (No Default Underlines) */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+a:hover, a:focus, a:visited {
+  text-decoration: none;
+}
+
 /* Accessibility Focus Ring */
 :focus-visible {
   outline: 2px solid var(--border-focus);
@@ -570,12 +580,42 @@ body {
 }
 
 .telemetry-item {
+  display: block;
   padding: 16px 20px;
   border-right: 1px solid var(--border-hairline);
+  text-decoration: none !important;
+  color: inherit;
+  transition: background-color var(--transition-fast);
+}
+
+.telemetry-item:hover {
+  background-color: var(--bg-hover);
+  text-decoration: none !important;
 }
 
 .telemetry-item:last-child {
   border-right: none;
+}
+
+.telemetry-item,
+.telemetry-item:hover,
+.telemetry-item:focus,
+.telemetry-item:visited,
+.telemetry-item * {
+  text-decoration: none !important;
+}
+
+.is-clickable {
+  cursor: pointer;
+  text-decoration: none !important;
+}
+
+.is-clickable:hover {
+  text-decoration: none !important;
+}
+
+.is-clickable * {
+  text-decoration: none !important;
 }
 
 .telemetry-label {
