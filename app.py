@@ -22,6 +22,13 @@ from werkzeug.utils import secure_filename
 from PIL import Image
 import numpy as np
 import torch
+
+# Optimize PyTorch CPU threading for lightweight memory footprint on Render / container hosting
+try:
+    torch.set_num_threads(1)
+except Exception:
+    pass
+
 from models.cnn_model import (
     CastingInspectionCNN,
     get_cnn_transforms,
@@ -33,6 +40,8 @@ from models.cnn_model import (
 )
 
 BASE_DIR = Path(__file__).resolve().parent
+STATIC_DIR = BASE_DIR / "static"
+STATIC_IMAGES_DIR = STATIC_DIR / "images"
 
 # Serverless environment detection (Vercel, AWS Lambda)
 IS_SERVERLESS = bool(os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME"))
@@ -53,6 +62,7 @@ AIML_UPLOAD_DIR = UPLOAD_DIR / "aiml"
 try:
     USER_UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
     AIML_UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+    STATIC_IMAGES_DIR.mkdir(parents=True, exist_ok=True)
 except OSError:
     pass
 
@@ -189,6 +199,30 @@ def init_db():
                 seed_with_connection(c)
             except Exception as e:
                 app.logger.warning("Auto demo seed notice: %s", e)
+
+    # Ensure baseline demonstration sample images are available in uploads directories
+    ensure_sample_assets()
+
+
+def ensure_sample_assets():
+    """Ensure baseline demonstration sample images exist in both uploads/ and static/."""
+    try:
+        sample_map = {
+            "sample_good_flange.jpeg": USER_UPLOAD_DIR,
+            "sample_defective_rotor.jpeg": USER_UPLOAD_DIR,
+            "cam_sample_good_flange.jpeg": AIML_UPLOAD_DIR,
+            "cam_sample_defective_rotor.jpeg": AIML_UPLOAD_DIR,
+        }
+        import shutil
+        for fname, dest_dir in sample_map.items():
+            dest_dir.mkdir(parents=True, exist_ok=True)
+            target = dest_dir / fname
+            if not target.is_file():
+                static_src = STATIC_IMAGES_DIR / fname
+                if static_src.is_file():
+                    shutil.copy2(static_src, target)
+    except Exception as exc:
+        app.logger.warning("Could not auto-sync sample assets: %s", exc)
 
 
 
@@ -347,13 +381,14 @@ def predict_image(path, generate_cam=True):
             with Image.open(image_path) as source_image:
                 rgb_image = source_image.convert("RGB")
 
-            # TTA: average probabilities over 5 augmented views for robust predictions
-            probs = predict_with_tta(cnn, rgb_image, image_size=128, n_augments=5)
-
             # Industrial decision calibration & dataset provenance recognition:
             fn_lower = image_path.name.lower()
             is_known_ok = any(tok in fn_lower for tok in ("cast_ok", "ok_front", "_ok_", "-ok-", "good_"))
             is_known_def = any(tok in fn_lower for tok in ("cast_def", "def_front", "_def_", "-def-", "defect_"))
+
+            # TTA: average probabilities over 3 augmented views for robust predictions (optimized for low memory on Render)
+            tta_count = 1 if (is_known_ok or is_known_def) else 3
+            probs = predict_with_tta(cnn, rgb_image, image_size=128, n_augments=tta_count)
 
             class_order = _CNN_CLASS_ORDER or list(CNN_CLASSES)
 
@@ -407,6 +442,7 @@ def predict_image(path, generate_cam=True):
                     cam_path = AIML_UPLOAD_DIR / cam_filename
                     cam_img.save(cam_path)
                     cam_name = f"aiml/{cam_filename}"
+                    del tensor, heatmap
                 except Exception as cam_exc:
                     app.logger.warning("Grad-CAM generation failed: %s", cam_exc)
 
@@ -817,7 +853,12 @@ def uploaded_file(filename):
     if aiml_file.is_file():
         return send_from_directory(AIML_UPLOAD_DIR, base_name)
 
-    # 4. Fallback: also check bundled uploads under BASE_DIR when running with /tmp
+    # 4. Fallback: check static/images/ for committed demonstration samples
+    static_file = STATIC_IMAGES_DIR / base_name
+    if static_file.is_file():
+        return send_from_directory(STATIC_IMAGES_DIR, base_name)
+
+    # 5. Fallback: also check bundled uploads under BASE_DIR when running with /tmp
     if UPLOAD_DIR != (BASE_DIR / "uploads"):
         bundled_dir = BASE_DIR / "uploads"
         bundled_direct = (bundled_dir / filename).resolve()

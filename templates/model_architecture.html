@@ -238,6 +238,18 @@
         <div class="dropzone-meta">Supports JPG, JPEG, PNG, WEBP (Max 8 MB)</div>
         <input type="file" id="liveImageInput" accept=".png,.jpg,.jpeg,.webp" style="display: none;">
       </div>
+
+      <!-- Quick Sample Buttons for Instant Testing -->
+      <div style="margin-top: 10px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+        <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">⚡ Test Samples:</span>
+        <button type="button" class="btn-custom-outline" style="font-size: 0.76rem; padding: 4px 10px; display: inline-flex; align-items: center; gap: 6px;" onclick="loadLiveSample('sample_good_flange.jpeg')">
+          <span class="status-indicator-dot dot-good" style="width: 7px; height: 7px;"></span> Good Flange
+        </button>
+        <button type="button" class="btn-custom-outline" style="font-size: 0.76rem; padding: 4px 10px; display: inline-flex; align-items: center; gap: 6px;" onclick="loadLiveSample('sample_defective_rotor.jpeg')">
+          <span class="status-indicator-dot dot-defect" style="width: 7px; height: 7px;"></span> Defective Rotor
+        </button>
+      </div>
+
       <div id="fileSelectedNote" style="font-size: 0.85rem; color: var(--accent-primary); margin-top: 8px; display: none; font-weight: 500;"></div>
       <button type="button" id="btnRunInference" class="btn-custom-primary" style="margin-top: 12px; width: 100%; display: none; justify-content: center;">
         <i class="bi bi-cpu"></i> Run CNN Inference & Explainability
@@ -349,8 +361,23 @@ document.addEventListener('DOMContentLoaded', () => {
       dropZone.classList.remove('scanning-beam-active');
       btnRun.disabled = false;
       resultBox.innerHTML = `<div class="reveal-fade-up" style="color: var(--status-defect-text);"><i class="bi bi-wifi-off"></i> Network error communicating with server.</div>`;
-    }
   });
+
+  window.loadLiveSample = async function(filename) {
+    try {
+      const resp = await fetch(`/static/images/${filename}`);
+      if (!resp.ok) throw new Error('Sample not found');
+      const blob = await resp.blob();
+      const file = new File([blob], filename, { type: blob.type || 'image/jpeg' });
+
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      fileInput.files = dt.files;
+      handleFileSelected();
+    } catch (err) {
+      console.error('Failed to load demo sample:', err);
+    }
+  };
 });
 </script>
 {% endblock %}

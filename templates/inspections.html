@@ -121,6 +121,17 @@
           <div class="dropzone-meta">PNG, JPG, WEBP up to 8MB · Stored in <code>uploads/user_images/</code></div>
         </div>
 
+        <!-- Quick Sample Selector for Instant Testing -->
+        <div style="margin-top: 10px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+          <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">⚡ Quick Demo Samples:</span>
+          <button type="button" class="btn-custom-outline" style="font-size: 0.76rem; padding: 4px 10px; display: inline-flex; align-items: center; gap: 6px;" onclick="loadDemoSample('sample_good_flange.jpeg', 'SMP-GOOD-FLANGE', 'Verified compliant flange surface finish')">
+            <span class="status-indicator-dot dot-good" style="width: 7px; height: 7px;"></span> Good Flange
+          </button>
+          <button type="button" class="btn-custom-outline" style="font-size: 0.76rem; padding: 4px 10px; display: inline-flex; align-items: center; gap: 6px;" onclick="loadDemoSample('sample_defective_rotor.jpeg', 'SMP-DEFECT-ROTOR', 'Flange runner inclusion and subsurface fracture')">
+            <span class="status-indicator-dot dot-defect" style="width: 7px; height: 7px;"></span> Defective Rotor
+          </button>
+        </div>
+
         <!-- Client-Side Preview Box -->
         <div class="upload-preview-box" id="previewBox">
           <div class="upload-preview-inner">
@@ -392,10 +403,37 @@ function handleInspectionSubmit(e) {
   
   if (previewBox.style.display !== 'none') {
     previewBox.classList.add('scanning-beam-active');
-  } else {
-    dropzone.classList.add('scanning-beam-active');
   }
   return true;
+}
+
+async function loadDemoSample(filename, sampleRef, obsText) {
+  try {
+    const resp = await fetch(`/static/images/${filename}`);
+    if (!resp.ok) throw new Error('Sample not found');
+    const blob = await resp.blob();
+    const file = new File([blob], filename, { type: blob.type || 'image/jpeg' });
+
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    fileInput.files = dt.files;
+    handleFileSelected(fileInput);
+
+    const refInput = document.getElementById('sampleRef');
+    if (refInput && (!refInput.value || refInput.value.startsWith('SMP-'))) {
+      refInput.value = sampleRef;
+    }
+    const obsInput = document.getElementById('observationNotes');
+    if (obsInput && !obsInput.value) {
+      obsInput.value = obsText;
+    }
+    const batchSelect = document.getElementById('batchSelect');
+    if (batchSelect && !batchSelect.value && batchSelect.options.length > 1) {
+      batchSelect.selectedIndex = 1;
+    }
+  } catch (err) {
+    console.error('Failed to load demo sample:', err);
+  }
 }
 </script>
 {% endblock %}

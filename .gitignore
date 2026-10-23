@@ -6,8 +6,17 @@ __pycache__/
 *.py[cod]
 .env
 data/
+# Ephemeral uploads, but preserve committed demonstration sample images
 uploads/*
 !uploads/.gitkeep
+!uploads/user_images/
+uploads/user_images/*
+!uploads/user_images/.gitkeep
+!uploads/user_images/sample_*
+!uploads/aiml/
+uploads/aiml/*
+!uploads/aiml/.gitkeep
+!uploads/aiml/cam_sample_*
 quality.db
 *.bak
 *.tmp
